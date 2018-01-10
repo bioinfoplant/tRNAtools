@@ -1,7 +1,7 @@
-tRNA tools - Mattia Belli
+tRNA tools - by Mattia Belli
 ====
 
-Perl scripts to analyse tRNA gene content.
+Perl scripts to analyze tRNA gene content.
 
 BASED on:
 
