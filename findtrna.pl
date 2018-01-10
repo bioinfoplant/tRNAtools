@@ -13,6 +13,13 @@ use strict;
 use Benchmark;
 #use diagnostics;
 
+
+# my $prog_name = $0;
+# $prog_name =~ s/\D//g;
+
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+my $prog_name = ($year + 1900).'-'.($mon+1).'-'.$mday;
+
 my $os = $^O;
 print "Running in: $os\n";
 unless ($os =~ /(linux|cygwin)/){
@@ -37,18 +44,15 @@ my $out2 = 0;
 my $out5 = 0;
 my $out6 = 0;
 
-my $prog_name = $0;
-$prog_name =~ s/\D//g;
-
 open (DATA, $file) or die "Impossibile aprire $file .";
-open (OUT, ">", "$file - tRNA stats [v $prog_name].txt") or die "Impossibile scrivere il file con le sequenze.";
-open (OUT2, ">", "$file - tRNA ANTICODONS annotations [v $prog_name].txt") or die "Impossibile scrivere il file con le sequenze." if $out2;
-open (OUT3, ">", "$file - tRNA CODONS stats [v $prog_name].txt") or die "Impossibile scrivere il file con le sequenze.";
-open (OUT4, ">", "$file - tRNA CODONS stats R READY [v $prog_name].txt") or die "Impossibile scrivere il file con le sequenze.";
-open (OUT5, ">", "$file - tRNA CODONS stats R READY RGF [v $prog_name].txt") or die "Impossibile scrivere il file con le sequenze." if $out5;
-open (OUT6, ">", "$file - tRNA CODONS stats R READY RGF x size correction [v $prog_name].txt") or die "Impossibile scrivere il file con le sequenze." if $out6;
-open (OUT7, ">", "$file - tRNA CODONS discarded species [v $prog_name].txt") or die "Impossibile scrivere il file con le sequenze.";
-open (OUT8, ">", "$file - tRNA CODONS Warnings [v $prog_name].txt") or die "Impossibile scrivere il file con le sequenze.";
+open (OUT, ">", "$file - [$prog_name] tRNA stats.txt") or die "Impossibile scrivere il file con le sequenze.";
+open (OUT2, ">", "$file - [$prog_name] tRNA ANTICODONS annotations.txt") or die "Impossibile scrivere il file con le sequenze." if $out2;
+open (OUT3, ">", "$file - [$prog_name] tRNA CODONS stats.txt") or die "Impossibile scrivere il file con le sequenze.";
+open (OUT4, ">", "$file - [$prog_name] tRNA CODONS stats R READY.txt") or die "Impossibile scrivere il file con le sequenze.";
+open (OUT5, ">", "$file - [$prog_name] tRNA CODONS stats R READY RGF.txt") or die "Impossibile scrivere il file con le sequenze." if $out5;
+open (OUT6, ">", "$file - [$prog_name] tRNA CODONS stats R READY RGF x size correction.txt") or die "Impossibile scrivere il file con le sequenze." if $out6;
+open (OUT7, ">", "$file - [$prog_name] tRNA CODONS discarded species.txt") or die "Impossibile scrivere il file con le sequenze.";
+open (OUT8, ">", "$file - [$prog_name] tRNA CODONS Warnings.txt") or die "Impossibile scrivere il file con le sequenze.";
 
 my @tRNA = qw(Phe Leu Ile Met Val Ser Pro Thr Ala Tyr His Gln Asn Lys Asp Glu Cys Trp Arg Gly);
 
