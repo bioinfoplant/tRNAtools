@@ -14,7 +14,10 @@ Lowe, T.M. and Eddy, S.R. (1997) Nucleic Acids Res, 25: 955-964.
 
 ** SYSTEM REQUIREMENTS **
 
-All scripts are written in Perl programming language so you need a perl interpreter installed on your machine.
+
+All scripts are written in Perl programming language so you need a Perl interpreter installed on your machine.
+
+tRNAscan-SE binaries are compiled for UNIX machines so you need UNIX-based OS or CygWin for Windows OS.
 
 MANDATORY
 1) Install a Perl interpreter
