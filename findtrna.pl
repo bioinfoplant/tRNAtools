@@ -4,7 +4,7 @@ eval 'exec perl -x -wS $0 ${1+"$@"}'
 if 0;
 
 #########
-# Developed by Mattia Belli 2013
+# Developed by Mattia Belli 2013-2018
 #########
 use List::Util qw(first);
 use warnings;
@@ -43,7 +43,7 @@ my $input_file;
 if ($num_args == 1) {
 	$input_file = $ARGV[0];
 } else {
-	print "File GenBank FLAT da analizzare: ";
+	print "Please specify the name of the GeneBank FLAT file: ";
 	$input_file = <STDIN>;
 }
 
@@ -55,15 +55,15 @@ my $out2 = 0;
 my $out5 = 0;
 my $out6 = 0;
 
-open (DATA, $input_file) or die "Impossibile aprire $input_file .";
-open (OUT, ">", "$input_file - [$prog_name] tRNA stats.txt") or die "Impossibile scrivere il file con le sequenze.";
-open (OUT2, ">", "$input_file - [$prog_name] tRNA ANTICODONS annotations.txt") or die "Impossibile scrivere il file con le sequenze." if $out2;
-open (OUT3, ">", "$input_file - [$prog_name] tRNA CODONS stats.txt") or die "Impossibile scrivere il file con le sequenze.";
-open (OUT4, ">", "$input_file - [$prog_name] tRNA CODONS stats R READY.txt") or die "Impossibile scrivere il file con le sequenze.";
-open (OUT5, ">", "$input_file - [$prog_name] tRNA CODONS stats R READY RGF.txt") or die "Impossibile scrivere il file con le sequenze." if $out5;
-open (OUT6, ">", "$input_file - [$prog_name] tRNA CODONS stats R READY RGF x size correction.txt") or die "Impossibile scrivere il file con le sequenze." if $out6;
-open (OUT7, ">", "$input_file - [$prog_name] tRNA CODONS discarded species.txt") or die "Impossibile scrivere il file con le sequenze.";
-open (OUT8, ">", "$input_file - [$prog_name] tRNA CODONS Warnings.txt") or die "Impossibile scrivere il file con le sequenze.";
+open (DATA, $input_file) or die "Cannot open $input_file .";
+open (OUT, ">", "$input_file - [$prog_name] tRNA stats.txt") or die "Cannot write the output files";
+open (OUT2, ">", "$input_file - [$prog_name] tRNA ANTICODONS annotations.txt") or die "Cannot write the output files" if $out2;
+open (OUT3, ">", "$input_file - [$prog_name] tRNA CODONS stats.txt") or die "Cannot write the output files";
+open (OUT4, ">", "$input_file - [$prog_name] tRNA CODONS stats R READY.txt") or die "Cannot write the output files";
+open (OUT5, ">", "$input_file - [$prog_name] tRNA CODONS stats R READY RGF.txt") or die "Cannot write the output files" if $out5;
+open (OUT6, ">", "$input_file - [$prog_name] tRNA CODONS stats R READY RGF x size correction.txt") or die "Cannot write the output files" if $out6;
+open (OUT7, ">", "$input_file - [$prog_name] tRNA CODONS discarded species.txt") or die "Cannot write the output files";
+open (OUT8, ">", "$input_file - [$prog_name] tRNA CODONS Warnings.txt") or die "Cannot write the output files";
 
 my @tRNA = qw(Phe Leu Ile Met Val Ser Pro Thr Ala Tyr His Gln Asn Lys Asp Glu Cys Trp Arg Gly);
 
@@ -537,7 +537,7 @@ while (<DATA>) {
 ####### tRNAs search #######
 ############################
 	
-	open (TRNASEQ, ">", "tRNASEQ.txt") or die "Impossibile scrivere il file con le sequenze.";
+	open (TRNASEQ, ">", "tRNASEQ.txt") or die "Cannot write the output files";
 	
 	print "$name\n\t$definition\n";
 	
