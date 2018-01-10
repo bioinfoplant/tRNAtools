@@ -370,6 +370,9 @@ my %results_warning;
 my $start_time = new Benchmark;
 
 
+###################################################
+######## SCAN every accessions, one by one ########
+
 while (<DATA>) {	
 	$accession_data .= $_; 
 	next unless ($_ =~ m|^\/\/|);	#Loads one record at once.
@@ -519,6 +522,10 @@ while (<DATA>) {
 	my %seq_to_find;
 	
 	
+############################
+####### tRNAs search #######
+############################
+	
 	open (TRNASEQ, ">", "tRNASEQ.txt") or die "Impossibile scrivere il file con le sequenze.";
 	
 	print "$name\n\t$definition\n";
@@ -577,10 +584,10 @@ while (<DATA>) {
 		}
 		
 		++$tRNA_standard;
+
 		## Anticodon ONLY for STANDARD AA
-		
-		
 		## This order accounts for modifications like CYTOSINE->LYSIDINE, if the annotation is present.
+
 		if ($tRNA_annotation=~ m!\/codon_recognized:\s?([AUGCT]{3})"!i) {
 			$anticodon = uc $1;
 			$anticodon =~ s/U/T/g;
@@ -679,8 +686,13 @@ while (<DATA>) {
 	print "tRNA annotations $tRNA_total	tRNA standard $tRNA_standard	ANTICODONS $anticodon_total	ND $unknown_anticodons\n\n";
 	close (TRNASEQ);
 
+#######Skips the whole genome record if it doesn't contain any tRNA standard annotated.	
+	if ($tRNA_standard == 0){
+		print "No STANDARD tRNAs found\n\n";
+		print OUT7 ">$name	[No STANDARD tRNAs found]\n";	
+		next;
+	}
 	
-
 	#Scanning with tRNAscan
 	my $tRNAscan_success=0;
 	if ($unknown_anticodons>0) {
