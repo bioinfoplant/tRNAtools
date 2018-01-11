@@ -769,7 +769,7 @@ while (<DATA>) {
 		}			
 	
 		
-		if (%warnings){		#Dont change the order, or remember to changed the file headers
+		if (%warnings){		#Dont change the order, or remember to change the file headers
 			print "*** SEE WARNINGS ***\n\n";
 			print OUT8 ">$name	tRNA annotations $tRNA_total tRNA standard $tRNA_standard ANTICODONS $anticodon_total ND $unknown_anticodons";
 			print OUT8 "\t";
