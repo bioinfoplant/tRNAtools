@@ -11,8 +11,6 @@ use warnings;
 use strict;
 # use LWP;
 use Benchmark;
-#use diagnostics;
-
 
 # my $prog_name = $0;
 # $prog_name =~ s/\D//g;
@@ -35,27 +33,27 @@ $ENV{MANPATH}.=':/home/tRNAscan/man';
 # my $client = LWP::UserAgent->new('agent' => 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1', keep_alive => 1, timeout => 30);
 
 
-# quit unless we have the correct number of command-line args
-
 my $num_args = $#ARGV + 1;
 my $input_file;
 
-if ($num_args == 1) {
+foreach (@ARGV) {
+	$_ =~ s/[\r\n]//g;	#Remove \r \n from arguments
+}
+
+if ($ARGV[0]){
 	$input_file = $ARGV[0];
 } else {
 	print "Please specify the name of the GeneBank FLAT file: ";
 	$input_file = <STDIN>;
+	chomp $input_file;
 }
 
-chomp $input_file;
-
 #I/O
-
 my $out2 = 0;
 my $out5 = 0;
 my $out6 = 0;
 
-open (DATA, $input_file) or die "Cannot open $input_file .";
+open (DATA, "<", $input_file) or die "Cannot read the data file";
 open (OUT, ">", "$input_file - [$prog_name] tRNA stats.txt") or die "Cannot write the output files";
 open (OUT2, ">", "$input_file - [$prog_name] tRNA ANTICODONS annotations.txt") or die "Cannot write the output files" if $out2;
 open (OUT3, ">", "$input_file - [$prog_name] tRNA CODONS stats.txt") or die "Cannot write the output files";
@@ -769,7 +767,7 @@ while (<DATA>) {
 		}			
 	
 		
-		if (%warnings){		#Dont change the order, or remember to changed the file headers
+		if (%warnings){		#Dont change the order, or remember to change the file headers
 			print "*** SEE WARNINGS ***\n\n";
 			print OUT8 ">$name	tRNA annotations $tRNA_total tRNA standard $tRNA_standard ANTICODONS $anticodon_total ND $unknown_anticodons";
 			print OUT8 "\t";
