@@ -26,9 +26,9 @@ unless ($os =~ /(linux|cygwin)/){
 	exit;
 }
 
-$ENV{PATH}.=':/home/tRNAscan/bin';
-$ENV{PERL5LIB}.=':/home/tRNAscan/bin';
-$ENV{MANPATH}.=':/home/tRNAscan/man';
+$ENV{PATH}.=':/home/tRNAscan2/bin';
+$ENV{PERL5LIB}.=':/home/tRNAscan2/lib/';
+$ENV{MANPATH}.=':/home/tRNAscan2/share/man';
 
 # my $client = LWP::UserAgent->new('agent' => 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1', keep_alive => 1, timeout => 30);
 
@@ -535,7 +535,7 @@ while (<DATA>) {
 ####### tRNAs search #######
 ############################
 	
-	open (TRNASEQ, ">", "tRNASEQ.txt") or die "Cannot write the output files";
+	open (TRNASEQ, ">", "tRNASEQ.txt") or die "Cannot write the tRNA sequence file";
 	
 	print "$name\n\t$definition\n";
 	

@@ -3,7 +3,7 @@
 ########################################################
 
 
-Installation of tRNAscan-SE 2.0
+1) Installation of tRNAscan-SE 2.0
 -----------------------------------------------------------------
 
 My install steps
@@ -16,25 +16,24 @@ My install steps
 
  ./configure --prefix=/home/tRNAscan2
 
+ make clean
 
---------
+2) tRNAfinder settings
+-----------------------------------------------------------------
 NOTE: tRNAfinder uses 
-$ENV{PATH}.=':/home/tRNAscan2/bin';
-$ENV{PERL5LIB}.=':/home/tRNAscan2/bin';
+$ENV{PATH}.='/home/tRNAscan2/bin';
+$ENV{PERL5LIB}.='/home/tRNAscan2/lib';
+$ENV{MANPATH}.='/home/tRNAscan2/share/man';
 
 If your installation path is different edit tRNAfinder.
 Otherwise you can edit your .bashrc file adding
 
-export PATH="$PATH:/home/tRNAscan/bin"
-export PERL5LIB="$PERL5LIB:/home/tRNAscan/bin"
-export MANPATH="$MANPATH:/home/tRNAscan/man"
+export PATH="$PATH:/home/tRNAscan2/bin"
+export PERL5LIB="$PERL5LIB:/home/tRNAscan2/lib"
+export MANPATH="$MANPATH:/home/tRNAscan2/share/man"
 
 
---------
-make clean
-
-
-Dependencies - Infernal 1.1.2
+3) Dependencies - Infernal 1.1.2
 -----------------------------------------------------------------
 
 tRNAscan-SE 2.0 requires separate installation of Infernal 1.1.2.
@@ -53,8 +52,7 @@ Starting from a source distribution, infernal-1.1.2.tar.gz:
  automated tests:           make check
  automated install:         make install
 
-
-
+ make clean
 
 
 
