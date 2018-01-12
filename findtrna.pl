@@ -71,7 +71,7 @@ open (OUT7, ">", "$input_file - [$prog_name] tRNA CODONS discarded species.txt")
 open (OUT8, ">", "$input_file - [$prog_name] tRNA CODONS Warnings.txt") or die "Cannot write the output files";
 open (LOG, ">", "$input_file - [$prog_name] LOG.txt") or die "Cannot write the log file";
 
-$tee = IO::Tee->new(STDOUT, LOG);
+my $tee = IO::Tee->new(\*STDOUT, \*LOG);
 select $tee;
 
 my @tRNA = qw(Phe Leu Ile Met Val Ser Pro Thr Ala Tyr His Gln Asn Lys Asp Glu Cys Trp Arg Gly);
