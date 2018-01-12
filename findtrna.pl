@@ -13,7 +13,8 @@ use List::Util qw(first);
 use warnings;
 use strict;
 # use LWP;
-use Benchmark;
+use Benchmark; 
+use IO::Tee;
 
 # my $prog_name = $0;
 # $prog_name =~ s/\D//g;
@@ -52,6 +53,9 @@ if ($ARGV[0]){
 }
 
 #I/O
+
+
+
 my $out2 = 0;
 my $out5 = 0;
 my $out6 = 0;
@@ -65,6 +69,10 @@ open (OUT5, ">", "$input_file - [$prog_name] tRNA CODONS stats R READY RGF.txt")
 open (OUT6, ">", "$input_file - [$prog_name] tRNA CODONS stats R READY RGF x size correction.txt") or die "Cannot write the output files" if $out6;
 open (OUT7, ">", "$input_file - [$prog_name] tRNA CODONS discarded species.txt") or die "Cannot write the output files";
 open (OUT8, ">", "$input_file - [$prog_name] tRNA CODONS Warnings.txt") or die "Cannot write the output files";
+open (LOG, ">", "$input_file - [$prog_name] LOG.txt") or die "Cannot write the log file";
+
+$tee = IO::Tee->new(STDOUT, LOG);
+select $tee;
 
 my @tRNA = qw(Phe Leu Ile Met Val Ser Pro Thr Ala Tyr His Gln Asn Lys Asp Glu Cys Trp Arg Gly);
 
@@ -545,15 +553,18 @@ while (<DATA>) {
 	print "Phase I - Searching for tRNA annotations..\n";
 	##tRNA count
 	while ($accession_data =~ m!\s{5,}(tRNA\s{5,}.+(?:\s{10,}.+){1,})!g){
-		++$tRNA_total;
 		my $tRNA_annotation = $1;
+		++$tRNA_total;
+		
+		my $location = $1 if ($tRNA_annotation=~ m|tRNA\s+((?:complement\()?join\(([\.,\d]+)\)\)?)|); 
+		
 		if ($tRNA_annotation =~ m!(pseudo|pseudogene)!i){ #Skips if it is annotated as a pseudogene
-			$warnings{'*Pseudo tRNA Annotation [#position]'} .= "#$tRNA_total ";
+			$warnings{'*Pseudo tRNA Annotation [#position]'} .= "#$tRNA_total - $location ";
 			next;
 		}
 		if ($tRNA_annotation=~ m!\/gene=".+?(fM|fMet).*?"!i){
 			print "fM or fMet is being skipped.\n";
-			$warnings{'*fMet Annotation [#position]'} .= "#$tRNA_total ";
+			$warnings{'*fMet Annotation [#position]'} .= "#$tRNA_total - $location ";
 			next;
 		}; #skip trnfM, formyl-Methionine 
 		my $AA = '';
@@ -564,7 +575,7 @@ while (<DATA>) {
 			$AA = $one_letter2three_letter{$1}; 
 			unless (exists $AA2anticodons{$AA}) { #Skips if it is not a standard AA
 				print "$AA is being skipped.\n";
-				$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total ";
+				$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total - $location ";
 				next;
 			}	
 			my $index = first { (lc($tRNA[$_])) eq (lc($AA)) } 0..$#tRNA;
@@ -575,7 +586,7 @@ while (<DATA>) {
 				my $product = $1;
 				if (uc $product ne uc $AA){
 					print "Gene name and product do not match: Gene for $AA but the product shown is $product\n"; #e.g. NC_022431.1 in complement(36270..36343)
-					$warnings{'*MISSMATCH Gene and Product annotations do not agree [#position]'} .= "#$tRNA_total "; 
+					$warnings{'*MISSMATCH Gene and Product annotations do not agree [#position]'} .= "#$tRNA_total - $location "; 
 				}
 			}
 						
@@ -583,7 +594,7 @@ while (<DATA>) {
 			$AA = $1; 
 			unless (exists $AA2anticodons{$AA}) {
 				print "$AA is being skipped.\n";
-				$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total ";
+				$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total - $location ";
 				next;
 			}	#Skips if it is not a standard AA
 			my $index = first { (lc($tRNA[$_])) eq (lc($AA)) } 0..$#tRNA;
@@ -591,7 +602,7 @@ while (<DATA>) {
 				++$tRNA_count[$index];
 			}
 		} else {
-			$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total ";
+			$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total - $location ";
 			next;	#Not a standard tRNA annotation
 		}
 		
@@ -637,14 +648,14 @@ while (<DATA>) {
 			++$anticodon_count{$rev_anticodon};
 			++$anticodon_total;
 			
-			$warnings{'*MISSMATCH Codon and anticodon annotations do not agree [#position]'} .= "$AA($anticodon)->$anticodon2AA{$rev_anticodon}($rev_anticodon), #$tRNA_total";
+			$warnings{'*MISSMATCH Codon and anticodon annotations do not agree [#position]'} .= "$AA($anticodon)->$anticodon2AA{$rev_anticodon}($rev_anticodon), #$tRNA_total - $location";
 			
 			print "$AA($anticodon) Codon/Anticodon Typo mistake? ->$anticodon2AA{$rev_anticodon}($rev_anticodon)\n";
 		}elsif (defined $anticodon2AA{$anticodon} and (uc $anticodon2AA{$anticodon} eq 'MET' and uc $AA eq 'ILE')){		
 			$anticodon = 'TAT';	#assigns tRNA-CAU to Ile when specified in the annotation
 			++$anticodon_count{$anticodon};
 			++$anticodon_total;	
-			$warnings{'*tRNA-CAU annotated as tRNA-Ile (not Met) [#position]'} .= "#$tRNA_total ";	
+			$warnings{'*tRNA-CAU annotated as tRNA-Ile (not Met) [#position]'} .= "#$tRNA_total - $location ";	
 		}else {
 		#	print "$tRNA_annotation\n\nUnknown anticodon..searching..\n";
 			++$unknown_anticodons;
