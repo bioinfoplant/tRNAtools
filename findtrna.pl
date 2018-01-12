@@ -715,9 +715,20 @@ while (<DATA>) {
 
 		my $tRNAscan;
 		
-		
-		# --brief: brief output format (no column headers)
-		
+		# tRNAscan-SE 2.0
+	
+		# -E                          : search for eukaryotic tRNAs (default)
+		# -B                          : search for bacterial tRNAs
+		# -A                          : search for archaeal tRNAs
+		# -M <model>                  : search for mitochondrial tRNAs, options: mammal, vert
+		# -O                          : search for other organellar tRNAs
+		# -G                          : use general tRNA model (cytoslic tRNAs from all 3 domains included)
+		# --mt <model>                : use mito tRNA models for cytosolic/mito detemination (if not specified, only cytosolic isotype-specific model scan will be performed)
+
+		# --brief					: brief output format (no column headers)
+		# -Q  						: do not prompt user before overwriting pre-existing result files(for batch processing)
+		# -q  --quiet               : quiet mode (credits & run option selections suppressed)
+
 		if ($organism =~ m|bacteria|i) {
 			print "Phase II - ** Bacterial Genome ** tRNAscan-SE is searching for bacterial tRNAs..\n";
 			$tRNAscan = `tRNAscan-SE -B -Q -q --brief /home/tRNASEQ.txt`; #Uses the covariance model specific for bacteria genomes
