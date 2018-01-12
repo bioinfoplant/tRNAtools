@@ -714,17 +714,24 @@ while (<DATA>) {
 		open (TRNASCAN_LOG, ">", "tRNASEQ LOG.txt") or die "Cannot write tRNAscan LOG file";
 
 		my $tRNAscan;
+		
+		
+		# --brief: brief output format (no column headers)
+		
 		if ($organism =~ m|bacteria|i) {
 			print "Phase II - ** Bacterial Genome ** tRNAscan-SE is searching for bacterial tRNAs..\n";
-			$tRNAscan = `tRNAscan-SE -B -Q -b -q /home/tRNASEQ.txt`; #Uses the covariance model specific for bacteria genomes
+			$tRNAscan = `tRNAscan-SE -B -Q -q --brief /home/tRNASEQ.txt`; #Uses the covariance model specific for bacteria genomes
 		} elsif ($definition =~ m!(plastid|chloroplast|apicoplast|chromatophore|cyanelle|mithocondrion)!i){
 			print "Phase II - ** Organellar Genome ** tRNAscan-SE is searching for organellar tRNAs..\n";	
-			$tRNAscan = `tRNAscan-SE -O -Q -b -q /home/tRNASEQ.txt`; #Uses the covariance model specific for plastids/mitochondria genomes, disabling the PSEUDOGENES check
+			$tRNAscan = `tRNAscan-SE -O -Q -q --brief /home/tRNASEQ.txt`; #Uses the covariance model specific for plastids/mitochondria genomes, disabling the PSEUDOGENES check
+		} elsif ($definition =~ m!(chromosome)!i){
+			print "Phase II - ** Organellar Genome ** tRNAscan-SE is searching for eukariotic tRNAs..\n";	
+			$tRNAscan = `tRNAscan-SE -E -Q -q --brief /home/tRNASEQ.txt`; #Uses the covariance model specific for : search for eukaryotic tRNAs
 		}else {
 			print "Phase II - ** Nuclear or Unspecified Genome ** tRNAscan-SE is searching for generic tRNAs..\n";
-			$tRNAscan = `tRNAscan-SE -Q -b -q /home/tRNASEQ.txt`; #Uses the generic covariance model
+			$tRNAscan = `tRNAscan-SE -G -Q -q --brief /home/tRNASEQ.txt`; #Uses the generic covariance model
 		}
-		
+
 		print TRNASCAN_LOG ">$name\n";
 		print TRNASCAN_LOG "$tRNAscan\n\n";
 
