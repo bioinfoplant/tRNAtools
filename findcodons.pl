@@ -1,7 +1,13 @@
-#!/bin/perl
+#!/bin/sh
+#! -*-perl-*-
+eval 'exec perl -x -wS $0 ${1+"$@"}'
+if 0;
+# the previous line is for system that doesn’t support the magic #! line,
+# or if the path to your interpreter is longer than 32 characters
+# (a built-in limit on many systems), you may be able to work around.
 
 #########
-# Developed by Mattia Belli 2013
+# Developed by Mattia Belli 2013-2018
 #########
 use warnings;
 use strict;
@@ -10,9 +16,20 @@ use strict;
 
 #3.1 Added RSCU calculation
 
-print "File GenBank FLAT da analizzare: ";
-my $file = <STDIN>;
-chomp $file;
+
+my $input_file;
+
+foreach (@ARGV) {
+	$_ =~ s/[\r\n]//g;	#Remove \r \n from arguments
+}
+
+if ($ARGV[0]){
+	$input_file = $ARGV[0];
+} else {
+	print "Please specify the name of a GeneBank FLAT file: ";
+	$input_file = <STDIN>;
+	chomp $input_file;
+}
 
 print "Specify the genes to be analyzed, if any (type ALL if you want to analyze all genes): ";
 my $gene_to_analyze = <STDIN>;
@@ -29,12 +46,12 @@ if (length $gene_to_analyze>25){
 	$genes_filename = $gene_to_analyze;
 }
 
-open (DATA, $file) or die "Impossibile aprire $file .";
-open (OUT, ">", "$file - CODONW TOT.txt") or die "Impossibile scrivere il file con le sequenze.";
-open (OUT1, ">", "$file - CODONW TOT R Ready.txt") or die "Impossibile scrivere il file con le sequenze.";
-open (OUT2, ">", "$file - CODONW TOT RSCU.txt") or die "Impossibile scrivere il file con le sequenze." if $RSCU_switch;
-open (OUT3, ">", "$file - CODONW $genes_filename.txt") or die "Impossibile scrivere il file con le sequenze." if $gene_to_analyze;
-open (OUT4, ">", "$file - CODONW $genes_filename R Ready.txt") or die "Impossibile scrivere il file con le sequenze." if $gene_to_analyze;
+open (DATA, $input_file) or die "Cannot open $input_file .";
+open (OUT, ">", "$input_file - CODONW TOT.txt") or die "Cannot write the sequence file";
+open (OUT1, ">", "$input_file - CODONW TOT R Ready.txt") or die "Cannot write the sequence file";
+open (OUT2, ">", "$input_file - CODONW TOT RSCU.txt") or die "Cannot write the sequence file" if $RSCU_switch;
+open (OUT3, ">", "$input_file - CODONW $genes_filename.txt") or die "Cannot write the sequence file" if $gene_to_analyze;
+open (OUT4, ">", "$input_file - CODONW $genes_filename R Ready.txt") or die "Cannot write the sequence file" if $gene_to_analyze;
 print OUT  "NAME	";
 print OUT1  "NAME	";
 print OUT2  "NAME	" if $RSCU_switch;
@@ -193,7 +210,7 @@ print OUT3 "\n" if $gene_to_analyze;
 print OUT4 "\n" if $gene_to_analyze;
 
 
-chdir "CodonW" or die "Impossibile aprire cartella CodonW";
+chdir "CodonW" or die "Cannot find CodonW";
 
 while (<DATA>) {	
 	$accession_data .= $_; 
@@ -232,9 +249,9 @@ while (<DATA>) {
 	
 	
 	print "Processing ($n)..$name ";
-	open (all_CDS_seq, ">", "all_CDS_SEQ.txt") or die "Impossibile scrivere il file con le sequenze.";
+	open (all_CDS_seq, ">", "all_CDS_SEQ.txt") or die "Cannot write the sequence file";
 	if ($gene_to_analyze) {
-		open (gene_CDS_seq, ">", "gene_CDS_SEQ.txt") or die "Impossibile scrivere il file con le sequenze.";	
+		open (gene_CDS_seq, ">", "gene_CDS_SEQ.txt") or die "Cannot write the sequence file";	
 	}
 	
 	my @name_list;
@@ -311,7 +328,7 @@ while (<DATA>) {
 
 	
 	system ('CodonW.exe all_CDS_SEQ.txt -nomenu -silent -total >NUL 2>&1');
-	open (CODONW, 'all_CDS_SEQ.blk') or die "Impossibile aprire il file output di CODONW.";
+	open (CODONW, 'all_CDS_SEQ.blk') or die "Cannot open CodonW output file";
 	my $codonW = join ("",<CODONW>);
 	close CODONW;
 	
@@ -339,7 +356,7 @@ while (<DATA>) {
 	
 	foreach my $AA (sort keys %AA2codons){
 		my $ref = $AA2codons{$AA};
-		foreach (sort @$ref){		#Da aggiustare perchè così mi fa il sort degli anticodoni e poi li trasforma in anticodoni
+		foreach (sort @$ref){		#Sorting method has to be revised
 			my $triplet = $_;
 			# my $rscu_score;
 			# if ($tot_codon_per_AA{$AA} == 0) {
@@ -369,13 +386,13 @@ while (<DATA>) {
 	
 	if ($found_gene) {
 		system ('CodonW.exe gene_CDS_SEQ.txt -nomenu -silent >NUL 2>&1');
-		open (CODONW2, 'gene_CDS_SEQ.blk') or die "Impossibile aprire il file output di CODONW.";
+		open (CODONW2, 'gene_CDS_SEQ.blk') or die "Cannot open CodonW output file";
 		
 		my $CUD_number;
 		my $codonW_data;
 		while (<CODONW2>) {	
 			$codonW_data .= $_; 
-			next unless ($_ =~ m|Genetic code|);	#Carica i dati di input e li elabora 1 alla volta
+			next unless ($_ =~ m|Genetic code|);	#Loads input data and processes them one by one
 			++$CUD_number;
 			my %codon_table_all;
 			while ($codonW_data =~ m!([AUCG]+)(?:\s+)?(\d+)\s*([\d\.]+)!g){
@@ -389,7 +406,7 @@ while (<DATA>) {
 			
 			foreach my $AA (sort keys %AA2codons){
 				my $ref = $AA2codons{$AA};
-				foreach (sort @$ref){		#Da aggiustare perchè così mi fa il sort degli anticodoni e poi li trasforma in anticodoni
+				foreach (sort @$ref){		#Sorting method has to be revised
 				my $triplet = $_;
 				print OUT3 "$triplet $codon_table_all{$triplet}	";
 				print OUT4 "$codon_table_all{$triplet}	";
@@ -410,8 +427,7 @@ while (<DATA>) {
 
 
 chdir;
-	# while ($codon_usage =~ m!([AUCG]+)(?:\s+)?([\d\.]+)\(\s*(\d+)\)!g){
-# CodonW.exe CDS_SEQ.txt -nomenu -silent -total
+
 
 close DATA;
 close OUT;
@@ -430,5 +446,5 @@ sub reverse_complement {
         return $revcomp;
 }
 
-print "\n\n****FATTO****\n\n";
+print "\n\n****DONE****\n\n";
 <>;
