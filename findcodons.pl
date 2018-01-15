@@ -39,11 +39,11 @@ $gene_to_analyze = undef unless $gene_to_analyze =~m/\w+/;
 my $RSCU_switch = 0;
 
 my $genes_filename if ($gene_to_analyze);
-if (length $gene_to_analyze>25){
+if ($gene_to_analyze and length $gene_to_analyze>25){
 	$genes_filename = substr( $gene_to_analyze, 0, 25);
 	$genes_filename .= "..and others";
 } else {
-	$genes_filename = $gene_to_analyze;
+	$genes_filename = $gene_to_analyze if ($gene_to_analyze);
 }
 
 open (DATA, $input_file) or die "Cannot open $input_file .";
