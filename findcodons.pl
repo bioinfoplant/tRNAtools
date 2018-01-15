@@ -327,7 +327,7 @@ while (<DATA>) {
 	close gene_CDS_seq if ($gene_to_analyze);	
 
 	
-	system ('CodonW.exe all_CDS_SEQ.txt -nomenu -silent -total >NUL 2>&1');
+	system ('codonw all_CDS_SEQ.txt -nomenu -silent -total >/dev/null 2>&1');
 	open (CODONW, 'all_CDS_SEQ.blk') or die "Cannot open CodonW output file";
 	my $codonW = join ("",<CODONW>);
 	close CODONW;
