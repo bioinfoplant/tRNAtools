@@ -12,12 +12,8 @@ if 0;
 use List::Util qw(first);
 use warnings;
 use strict;
-# use LWP;
 use Benchmark; 
 use IO::Tee;
-
-# my $prog_name = $0;
-# $prog_name =~ s/\D//g;
 
 my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 my $prog_name = ($year + 1900).'-'.($mon+1).'-'.$mday;
@@ -33,9 +29,6 @@ unless ($os =~ /(linux|cygwin)/){
 $ENV{PATH}.=':/home/tRNAscan2/bin';
 $ENV{PERL5LIB}.=':/home/tRNAscan2/lib';
 $ENV{MANPATH}.=':/home/tRNAscan2/share/man';
-
-# my $client = LWP::UserAgent->new('agent' => 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1', keep_alive => 1, timeout => 30);
-
 
 my $input_file;
 
@@ -400,7 +393,7 @@ while (<DATA>) {
 	print "\n*Processing.. $n \n";
 	
 	
-	my ($name, $definition, $organism, $date, $size, $id, $sequence, $id_gi) = '';
+	my ($name, $source, $definition, $organism, $date, $size, $id, $sequence, $id_gi) = '' x 9;
 	if ($accession_data =~ m|LOCUS.+\s+?(\d+)\s?bp.+?(\S+)\n|){
 		$date = lc ($2);
 		$size = $1;
@@ -413,6 +406,11 @@ while (<DATA>) {
 		$definition =~ s/\s+/ /g;
 	} else {
 		$definition = 'ND';
+	}
+	
+	
+	if ($accession_data =~ m|SOURCE\s+(.+)\n|){
+		$source = $1;
 	}
 	
 	if ($accession_data =~ m|VERSION\s+(.+?)(?:\s+GI:(.+?))?\n|){
@@ -555,7 +553,7 @@ while (<DATA>) {
 		my $tRNA_annotation = $1;
 		++$tRNA_total;
 		
-		my $location = $1 if ($tRNA_annotation=~ m|tRNA\s+((?:complement\()?join\(([\.,\d]+)\)\)?)|); 
+		my $location = $1 if ($tRNA_annotation=~ m|tRNA\s+((?:complement\()?(?:join\()?([\.,\d]+)\)?\)?)|); 
 		
 		if ($tRNA_annotation =~ m!(pseudo|pseudogene)!i){ #Skips if it is annotated as a pseudogene
 			$warnings{'*Pseudo tRNA Annotation [#position]'} .= "#$tRNA_total - $location ";
@@ -742,11 +740,11 @@ while (<DATA>) {
 		if ($organism =~ m|bacteria|i) {
 			print "Phase II - ** Bacterial Genome ** tRNAscan-SE is searching for bacterial tRNAs..\n";
 			$tRNAscan = `tRNAscan-SE -B -Q -q --brief /home/tRNASEQ.txt`; #Uses the covariance model specific for bacteria genomes
-		} elsif ($definition =~ m!(plastid|chloroplast|apicoplast|chromatophore|cyanelle|mithocondrion)!i){
+		} elsif (($definition =~ m!(plastid|chloroplast|apicoplast|chromatophore|cyanelle|mithocondrion)!i) or ($source =~ m!(plastid|chloroplast|apicoplast|chromatophore|cyanelle|mithocondrion)!i)){
 			print "Phase II - ** Organellar Genome ** tRNAscan-SE is searching for organellar tRNAs..\n";	
 			$tRNAscan = `tRNAscan-SE -O -Q -q --brief /home/tRNASEQ.txt`; #Uses the covariance model specific for plastids/mitochondria genomes, disabling the PSEUDOGENES check
 		} elsif ($definition =~ m!(chromosome)!i){
-			print "Phase II - ** Organellar Genome ** tRNAscan-SE is searching for eukariotic tRNAs..\n";	
+			print "Phase II - ** Eukariotic Genome ** tRNAscan-SE is searching for eukariotic tRNAs..\n";	
 			$tRNAscan = `tRNAscan-SE -E -Q -q --brief /home/tRNASEQ.txt`; #Uses the covariance model specific for : search for eukaryotic tRNAs
 		}else {
 			print "Phase II - ** Nuclear or Unspecified Genome ** tRNAscan-SE is searching for generic tRNAs..\n";
