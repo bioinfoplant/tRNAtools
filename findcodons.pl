@@ -232,7 +232,13 @@ while (<DATA>) {
 		$organism = $2;
 	}
 	
+	$organism =~ s/^[\s]+//g;
+	$organism =~ s/\s{2,}/ /g;
+	
 	$name .= " $id"; 
+	
+	
+	print "Processing ($n)..$name ";
 	
 	#Skips if there are not CDS annotations
 	unless ($accession_data =~ m!\n\s{5,}(CDS\s{5,}.+?)\/translation!sg) {
@@ -241,14 +247,9 @@ while (<DATA>) {
 		next;
 	}
 	
-	$organism =~ s/^[\s]+//g;
-	$organism =~ s/\s{2,}/ /g;
-	
 	$sequence = $1 if ($accession_data =~ m/ORIGIN([\W\w]+)\n\/\//);
 	$sequence =~ s/[\W\d]+//g;
 	
-	
-	print "Processing ($n)..$name ";
 	open (all_CDS_seq, ">", "all_CDS_SEQ.txt") or die "Cannot write the sequence file";
 	if ($gene_to_analyze) {
 		open (gene_CDS_seq, ">", "gene_CDS_SEQ.txt") or die "Cannot write the sequence file";	
@@ -447,4 +448,5 @@ sub reverse_complement {
 }
 
 print "\n\n****DONE****\n\n";
-<>;
+
+exit;
