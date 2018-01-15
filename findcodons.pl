@@ -217,9 +217,7 @@ while (<DATA>) {
 	next unless ($_ =~ m|^\/\/|);	#One record at a time
 	++$n;
 	
-
-	
-	my ($name, $organism, $date, $id, $sequence) = '';
+	my ($name, $organism, $date, $id, $sequence) = '' x 5;
 	if ($accession_data =~ m|VERSION\s+(.+?)\s|g){
 		$id = $1;
 	} 	
@@ -229,11 +227,11 @@ while (<DATA>) {
 	# }
 	if ($accession_data =~ m|ORGANISM\s+(.+?)\n(.+?)\.\n|sg){
 		$name = $1;
-		$organism = $2;
+		# $organism = $2;
 	}
 	
-	$organism =~ s/^[\s]+//g;
-	$organism =~ s/\s{2,}/ /g;
+	# $organism =~ s/^[\s]+//g;
+	# $organism =~ s/\s{2,}/ /g;
 	
 	$name .= " $id"; 
 	
@@ -247,25 +245,26 @@ while (<DATA>) {
 		next;
 	}
 	
-	$sequence = $1 if ($accession_data =~ m/ORIGIN([\W\w]+)\n\/\//);
-	$sequence =~ s/[\W\d]+//g;
+	if ($accession_data =~ m/ORIGIN([\W\w]+)\n\/\//){
+		$sequence = $1; 
+		$sequence =~ s/[\W\d]+//g;
+	} else {
+		print "$name -> no SEQUENCE found!\n";
+		next;
+	}
+	
 	
 	open (all_CDS_seq, ">", "all_CDS_SEQ.txt") or die "Cannot write the sequence file";
 	if ($gene_to_analyze) {
 		open (gene_CDS_seq, ">", "gene_CDS_SEQ.txt") or die "Cannot write the sequence file";	
 	}
 	
-	my @name_list;
-	my $n_cds;
-	my $found_gene;
-	my $gene_found;
+	my @name_list = ();
+	my ($n_cds, $found_gene, $gene_found) = '' x 3;
 	while ($accession_data =~ m!\n\s{5,}(CDS\s{5,}.+?)\/translation!sg){
 		++$n_cds;
-
 		my $cds = $1;
-		my $seq_position;
-		my $annotation;
-		my $CDS_seq;
+		my ($seq_position, $annotation, $CDS_seq) = '' x 3;
 		my $gene_name = 'Unknown';
 		$gene_name = $1 if ($cds =~ m|\/db_xref="(.+)"|);
 		$gene_name = $1 if ($cds =~ m|\/locus_tag="(.+)"|);
@@ -276,6 +275,7 @@ while (<DATA>) {
 		if ($cds =~ m|(CDS\s+(?:complement\()?join\((.+?)\))\n|s){
 			$annotation = $1;
 			$seq_position = $2;
+			$seq_position =~ s/\n\s+//g;
 			$annotation =~ s/\n\s+//g;
 			my @parts = split (",", $seq_position);
 			foreach (@parts){
@@ -328,19 +328,23 @@ while (<DATA>) {
 	close gene_CDS_seq if ($gene_to_analyze);	
 
 	
-	system ('codonw all_CDS_SEQ.txt -nomenu -silent -total >/dev/null 2>&1');
-	open (CODONW, 'all_CDS_SEQ.blk') or die "Cannot open CodonW output file";
-	my $codonW = join ("",<CODONW>);
+	system ('./codonw all_CDS_SEQ.txt -nomenu -silent -total >/dev/null 2>&1');
+
+	open (CODONW, "<", 'all_CDS_SEQ.blk') or die "Cannot open CodonW output file";
+	my $codonW = '';
+	$codonW = join ("",<CODONW>);
 	close CODONW;
+	
+	# system ('mv all_CDS_SEQ.blk last_all_CDS_SEQ.blk');
+	# system ('mv all_CDS_SEQ.out last_all_CDS_SEQ.out');
+	# system ('mv all_CDS_SEQ.txt last_all_CDS_SEQ.txt');
 	
 	# my %tot_codon_per_AA;
 	my %codon_table;
 	my %codon_table_rscu;
 	# print $codonW;
 	while ($codonW =~ m!([AUCG]+)(?:\s+)?(\d+)\s*([\d\.]+)!g){
-		my $triplet = $1;
-		my $codon_number = $2;
-		my $rscu = $3;
+		my ($triplet, $codon_number, $rscu) = ($1, $2, $3);
 		# print "\n$triplet";
 		$triplet =~ s/U/T/g;
 		# print "\n$triplet";
@@ -379,6 +383,8 @@ while (<DATA>) {
 		}
 	}	
 
+	undef %codon_table;
+	undef %codon_table_rscu;
 	print OUT "\n";
 	print OUT1 "\n";
 	
@@ -389,8 +395,8 @@ while (<DATA>) {
 		system ('CodonW.exe gene_CDS_SEQ.txt -nomenu -silent >NUL 2>&1');
 		open (CODONW2, 'gene_CDS_SEQ.blk') or die "Cannot open CodonW output file";
 		
-		my $CUD_number;
-		my $codonW_data;
+		my $CUD_number = '';
+		my $codonW_data = '';
 		while (<CODONW2>) {	
 			$codonW_data .= $_; 
 			next unless ($_ =~ m|Genetic code|);	#Loads input data and processes them one by one
