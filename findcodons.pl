@@ -15,7 +15,8 @@ use strict;
 
 
 #3.1 Added RSCU calculation
-
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+my $prog_name = ($year + 1900).'-'.($mon+1).'-'.$mday;
 
 my $input_file;
 
@@ -46,12 +47,12 @@ if ($gene_to_analyze and length $gene_to_analyze>25){
 	$genes_filename = $gene_to_analyze if ($gene_to_analyze);
 }
 
-open (DATA, $input_file) or die "Cannot open $input_file .";
-open (OUT, ">", "$input_file - CODONW TOT.txt") or die "Cannot write the sequence file";
-open (OUT1, ">", "$input_file - CODONW TOT R Ready.txt") or die "Cannot write the sequence file";
-open (OUT2, ">", "$input_file - CODONW TOT RSCU.txt") or die "Cannot write the sequence file" if $RSCU_switch;
-open (OUT3, ">", "$input_file - CODONW $genes_filename.txt") or die "Cannot write the sequence file" if $gene_to_analyze;
-open (OUT4, ">", "$input_file - CODONW $genes_filename R Ready.txt") or die "Cannot write the sequence file" if $gene_to_analyze;
+open (DATA, "<", $input_file) or die "Cannot open $input_file .";
+open (OUT, ">", "$input_file - [$prog_name] - CODONW TOT.txt") or die "Cannot write the sequence file";
+open (OUT1, ">", "$input_file - [$prog_name] - CODONW TOT R Ready.txt") or die "Cannot write the sequence file";
+open (OUT2, ">", "$input_file - [$prog_name] - CODONW TOT RSCU.txt") or die "Cannot write the sequence file" if $RSCU_switch;
+open (OUT3, ">", "$input_file - [$prog_name] - CODONW $genes_filename.txt") or die "Cannot write the sequence file" if $gene_to_analyze;
+open (OUT4, ">", "$input_file - [$prog_name] - CODONW $genes_filename R Ready.txt") or die "Cannot write the sequence file" if $gene_to_analyze;
 print OUT  "NAME	";
 print OUT1  "NAME	";
 print OUT2  "NAME	" if $RSCU_switch;
