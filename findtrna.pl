@@ -645,7 +645,7 @@ while (<DATA>) {
 			++$anticodon_count{$rev_anticodon};
 			++$anticodon_total;
 			
-			$warnings{'*MISSMATCH Codon and anticodon annotations do not agree [#position]'} .= "$AA($anticodon)->$anticodon2AA{$rev_anticodon}($rev_anticodon), #$tRNA_total - $location";
+			$warnings{'*MISSMATCH Codon and anticodon annotations do not agree [#position]'} .= "#$tRNA_total - $location ($AA($anticodon)->$anticodon2AA{$rev_anticodon}($rev_anticodon))";
 			
 			print "$AA($anticodon) Codon/Anticodon Typo mistake? ->$anticodon2AA{$rev_anticodon}($rev_anticodon)\n";
 		}elsif (defined $anticodon2AA{$anticodon} and (uc $anticodon2AA{$anticodon} eq 'MET' and uc $AA eq 'ILE')){		
