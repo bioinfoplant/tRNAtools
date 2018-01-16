@@ -48,9 +48,9 @@ if ($gene_to_analyze and length $gene_to_analyze>25){
 }
 
 open (DATA, "<", $input_file) or die "Cannot open $input_file .";
-open (OUT, ">", "$input_file - [$prog_name] - CODONW TOT.txt") or die "Cannot write the sequence file";
-open (OUT1, ">", "$input_file - [$prog_name] - CODONW TOT R Ready.txt") or die "Cannot write the sequence file";
-open (OUT2, ">", "$input_file - [$prog_name] - CODONW TOT RSCU.txt") or die "Cannot write the sequence file" if $RSCU_switch;
+open (OUT, ">", "$input_file - [$prog_name] - CODONS.txt") or die "Cannot write the sequence file";
+open (OUT1, ">", "$input_file - [$prog_name] - CODONS R Ready.txt") or die "Cannot write the sequence file";
+open (OUT2, ">", "$input_file - [$prog_name] - CODONS RSCU.txt") or die "Cannot write the sequence file" if $RSCU_switch;
 open (OUT3, ">", "$input_file - [$prog_name] - CODONW $genes_filename.txt") or die "Cannot write the sequence file" if $gene_to_analyze;
 open (OUT4, ">", "$input_file - [$prog_name] - CODONW $genes_filename R Ready.txt") or die "Cannot write the sequence file" if $gene_to_analyze;
 print OUT  "NAME	";
