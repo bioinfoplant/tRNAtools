@@ -22,13 +22,13 @@ use Benchmark;
 print "File from findcodon.pl: ";
 my $file = <STDIN>;
 chomp $file;
-open (CODONW_FILE, $file) or die "Impossibile aprire $file.";
+open (CODONW_FILE, $file) or die "Cannot open $file.";
 
 
 print "File from findtrna.pl: ";
 my $file2 = <STDIN>;
 chomp $file2;
-open (TRNA_STATS, $file2) or die "Impossibile aprire $file2 .";
+open (TRNA_STATS, $file2) or die "Cannot open $file2 .";
 
 print "p-value calculation method:
 
@@ -37,6 +37,7 @@ print "p-value calculation method:
 		(3) Perl Permutation (very slow)
 		
 	   Choose one method (1,2,3): ";
+	   
 my $answer = <STDIN>;
 chomp $answer  ;
 $answer = 1 unless ($answer == 2 or $answer == 3);
@@ -571,4 +572,4 @@ sub reverse_complement {
         return $revcomp;
 }
 
-<>;
+exit;
