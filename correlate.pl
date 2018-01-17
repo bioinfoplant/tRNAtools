@@ -2,9 +2,12 @@
 #! -*-perl-*-
 eval 'exec perl -x -wS $0 ${1+"$@"}'
 if 0;
+# the previous line is for system that doesn’t support the magic #! line,
+# or if the path to your interpreter is longer than 32 characters
+# (a built-in limit on many systems), you may be able to work around.
 
 #########
-# Developed by Mattia Belli 2013
+# Developed by Mattia Belli 2013-2018
 #########
 use warnings;
 use strict;
@@ -16,13 +19,13 @@ use Benchmark;
 #use Array::Shuffle qw(shuffle_array);
 #use diagnostics;
 
-print "File codonw: ";
+print "File from findcodon.pl: ";
 my $file = <STDIN>;
 chomp $file;
 open (CODONW_FILE, $file) or die "Impossibile aprire $file.";
 
 
-print "File tRNA codon stats: ";
+print "File from findtrna.pl: ";
 my $file2 = <STDIN>;
 chomp $file2;
 open (TRNA_STATS, $file2) or die "Impossibile aprire $file2 .";
