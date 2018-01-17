@@ -55,4 +55,10 @@ Starting from a source distribution, infernal-1.1.2.tar.gz:
  make clean
 
 
+#####################################################
+############ CodonW installation NOTES ##############
+#####################################################
+
+./codonWinstall codonw
+
 
