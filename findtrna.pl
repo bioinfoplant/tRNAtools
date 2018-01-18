@@ -54,13 +54,13 @@ my $out5 = 0;
 my $out6 = 0;
 
 open (DATA, "<", $input_file) or die "Cannot read the data file";
-open (OUT, ">", "$input_file - [$prog_name] tRNA stats.txt") or die "Cannot write the output files";
-open (OUT2, ">", "$input_file - [$prog_name] tRNA ANTICODONS annotations.txt") or die "Cannot write the output files" if $out2;
-open (OUT3, ">", "$input_file - [$prog_name] tRNA stats.txt") or die "Cannot write the output files";
+open (OUT, ">", "$input_file - [$prog_name] tRNA FULL Data.txt") or die "Cannot write the output files";
+open (OUT2, ">", "$input_file - [$prog_name] tRNA ANTICODONS Data.txt") or die "Cannot write the output files" if $out2;
+open (OUT3, ">", "$input_file - [$prog_name] tRNA Data.txt") or die "Cannot write the output files";
 open (OUT4, ">", "$input_file - [$prog_name] tRNA R READY.txt") or die "Cannot write the output files";
 open (OUT5, ">", "$input_file - [$prog_name] tRNA R READY RGF.txt") or die "Cannot write the output files" if $out5;
 open (OUT6, ">", "$input_file - [$prog_name] tRNA R READY RGF x size correction.txt") or die "Cannot write the output files" if $out6;
-open (OUT7, ">", "$input_file - [$prog_name] tRNA discarded species.txt") or die "Cannot write the output files";
+open (OUT7, ">", "$input_file - [$prog_name] tRNA Discarded species.txt") or die "Cannot write the output files";
 open (OUT8, ">", "$input_file - [$prog_name] tRNA Warnings.txt") or die "Cannot write the output files";
 open (LOG, ">", "$input_file - [$prog_name] LOG.txt") or die "Cannot write the log file";
 
@@ -722,7 +722,7 @@ while (<DATA>) {
 		
 		open (TRNASCAN_LOG, ">", "tRNASEQ LOG.txt") or die "Cannot write tRNAscan LOG file";
 
-		my $tRNAscan;
+		my $tRNAscan = '';
 		
 		# tRNAscan-SE 2.0
 	
