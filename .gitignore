@@ -2,7 +2,7 @@
 DATA*
 Annotation Errors.docx
 Common GENES.txt
-REF Plasmodium vivax
+REF *
 Rubbish/
 SETUP infernal-1.1.2/
 SETUP tRNAscan-SE-2.0/
