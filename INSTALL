@@ -3,46 +3,62 @@
 ########################################################
 
 
-1) MAKEFILE EDIT
+1) Installation of tRNAscan-SE 2.0
+-----------------------------------------------------------------
 
-## where Perl v.5 (or greater) is installed
-PERLDIR = /bin
+My install steps
+ uncompress:                gunzip trnascan-se-2.0.0.tar.gz  
+ unpack:                    tar xf trnascan-se-2.0.0.tar
+ move into new directory:   cd trnascan-se-2.0.0
+ configure:                 ./configure --prefix=/home/tRNAscan2
+ build:                     make
+ automated install:         make install
 
-## what you call the Perl v.5 executable on your system
-## (this could be 'perl5' or otherwise on some systems)
-PERLBIN = perl
+ ./configure --prefix=/home/tRNAscan2
 
-## where you want things installed
-BINDIR  = /home/tRNAscan/bin
-LIBDIR  = /home/tRNAscan/lib
-MANDIR  = /home/tRNAscan/man
+ make clean
 
---------
-2) make
-
---------
-3) NOTE: tRNAfinder uses 
-$ENV{PATH}.=':/home/tRNAscan/bin';
-$ENV{PERL5LIB}.=':/home/tRNAscan/bin';
-$ENV{MANPATH}.=':/home/tRNAscan/man';
+2) tRNAfinder settings
+-----------------------------------------------------------------
+NOTE: tRNAfinder uses 
+$ENV{PATH}.=':/home/tRNAscan2/bin';
+$ENV{PERL5LIB}.=':/home/tRNAscan2/lib';
+$ENV{MANPATH}.=':/home/tRNAscan2/share/man';
 
 If your installation path is different edit tRNAfinder.
 Otherwise you can edit your .bashrc file adding
 
-export PATH="$PATH:/home/tRNAscan/bin"
-export PERL5LIB="$PERL5LIB:/home/tRNAscan/bin"
-export MANPATH="$MANPATH:/home/tRNAscan/man"
-
-4) make install
-
---------
-5) make testrun
-
---------
-6) make clean
+export PATH="$PATH:/home/tRNAscan2/bin"
+export PERL5LIB="$PERL5LIB:/home/tRNAscan2/lib"
+export MANPATH="$MANPATH:/home/tRNAscan2/share/man"
 
 
+3) Dependencies - Infernal 1.1.2
+-----------------------------------------------------------------
+
+tRNAscan-SE 2.0 requires separate installation of Infernal 1.1.2.
+The source code and prebuilt binaries can be obtained at
+http://eddylab.org/infernal/.
+
+The installation directory of Infernal should be the same as the one
+where tRNAscan-SE 2.0 is installed.
+
+Starting from a source distribution, infernal-1.1.2.tar.gz:
+ uncompress:                uncompress infernal-1.1.2.tar.gz  
+ unpack:                    tar xf infernal-1.1.2.tar
+ move into new directory:   cd infernal-1.1.2
+ configure:                 ./configure --prefix=/home/tRNAscan2
+ build:                     make
+ automated tests:           make check
+ automated install:         make install
+
+ make clean
 
 
+#####################################################
+############ CodonW installation NOTES ##############
+#####################################################
+
+./codonWinstall codonw
 
 

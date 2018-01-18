@@ -2,6 +2,9 @@
 #! -*-perl-*-
 eval 'exec perl -x -wS $0 ${1+"$@"}'
 if 0;
+# the previous line is for system that doesn’t support the magic #! line,
+# or if the path to your interpreter is longer than 32 characters
+# (a built-in limit on many systems), you may be able to work around.
 
 #########
 # Developed by Mattia Belli 2013-2018
@@ -11,9 +14,8 @@ use warnings;
 use strict;
 # use LWP;
 use Benchmark;
-
-# my $prog_name = $0;
-# $prog_name =~ s/\D//g;
+#use diagnostics;
+use IO::Tee;
 
 my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 my $prog_name = ($year + 1900).'-'.($mon+1).'-'.$mday;
@@ -26,14 +28,11 @@ unless ($os =~ /(linux|cygwin)/){
 	exit;
 }
 
-$ENV{PATH}.=':/home/tRNAscan/bin';
-$ENV{PERL5LIB}.=':/home/tRNAscan/bin';
-$ENV{MANPATH}.=':/home/tRNAscan/man';
-
-# my $client = LWP::UserAgent->new('agent' => 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1', keep_alive => 1, timeout => 30);
+$ENV{PATH}.=':/home/tRNAscan2/bin';
+$ENV{PERL5LIB}.=':/home/tRNAscan2/lib';
+$ENV{MANPATH}.=':/home/tRNAscan2/share/man';
 
 
-my $num_args = $#ARGV + 1;
 my $input_file;
 
 foreach (@ARGV) {
@@ -49,6 +48,7 @@ if ($ARGV[0]){
 }
 
 #I/O
+
 my $out2 = 0;
 my $out5 = 0;
 my $out6 = 0;
@@ -56,12 +56,16 @@ my $out6 = 0;
 open (DATA, "<", $input_file) or die "Cannot read the data file";
 open (OUT, ">", "$input_file - [$prog_name] tRNA stats.txt") or die "Cannot write the output files";
 open (OUT2, ">", "$input_file - [$prog_name] tRNA ANTICODONS annotations.txt") or die "Cannot write the output files" if $out2;
-open (OUT3, ">", "$input_file - [$prog_name] tRNA CODONS stats.txt") or die "Cannot write the output files";
-open (OUT4, ">", "$input_file - [$prog_name] tRNA CODONS stats R READY.txt") or die "Cannot write the output files";
-open (OUT5, ">", "$input_file - [$prog_name] tRNA CODONS stats R READY RGF.txt") or die "Cannot write the output files" if $out5;
-open (OUT6, ">", "$input_file - [$prog_name] tRNA CODONS stats R READY RGF x size correction.txt") or die "Cannot write the output files" if $out6;
-open (OUT7, ">", "$input_file - [$prog_name] tRNA CODONS discarded species.txt") or die "Cannot write the output files";
-open (OUT8, ">", "$input_file - [$prog_name] tRNA CODONS Warnings.txt") or die "Cannot write the output files";
+open (OUT3, ">", "$input_file - [$prog_name] tRNA stats.txt") or die "Cannot write the output files";
+open (OUT4, ">", "$input_file - [$prog_name] tRNA R READY.txt") or die "Cannot write the output files";
+open (OUT5, ">", "$input_file - [$prog_name] tRNA R READY RGF.txt") or die "Cannot write the output files" if $out5;
+open (OUT6, ">", "$input_file - [$prog_name] tRNA R READY RGF x size correction.txt") or die "Cannot write the output files" if $out6;
+open (OUT7, ">", "$input_file - [$prog_name] tRNA discarded species.txt") or die "Cannot write the output files";
+open (OUT8, ">", "$input_file - [$prog_name] tRNA Warnings.txt") or die "Cannot write the output files";
+open (LOG, ">", "$input_file - [$prog_name] LOG.txt") or die "Cannot write the log file";
+
+my $tee = IO::Tee->new(\*STDOUT, \*LOG);
+select $tee;
 
 my @tRNA = qw(Phe Leu Ile Met Val Ser Pro Thr Ala Tyr His Gln Asn Lys Asp Glu Cys Trp Arg Gly);
 
@@ -390,7 +394,7 @@ while (<DATA>) {
 	print "\n*Processing.. $n \n";
 	
 	
-	my ($name, $definition, $organism, $date, $size, $id, $sequence, $id_gi) = '';
+	my ($name, $source, $definition, $organism, $date, $size, $id, $sequence, $id_gi) = '' x 9;
 	if ($accession_data =~ m|LOCUS.+\s+?(\d+)\s?bp.+?(\S+)\n|){
 		$date = lc ($2);
 		$size = $1;
@@ -403,6 +407,11 @@ while (<DATA>) {
 		$definition =~ s/\s+/ /g;
 	} else {
 		$definition = 'ND';
+	}
+	
+	
+	if ($accession_data =~ m|SOURCE\s+(.+)\n|){
+		$source = $1;
 	}
 	
 	if ($accession_data =~ m|VERSION\s+(.+?)(?:\s+GI:(.+?))?\n|){
@@ -535,22 +544,25 @@ while (<DATA>) {
 ####### tRNAs search #######
 ############################
 	
-	open (TRNASEQ, ">", "tRNASEQ.txt") or die "Cannot write the output files";
+	open (TRNASEQ, ">", "tRNASEQ.txt") or die "Cannot write the tRNA sequence file";
 	
 	print "$name\n\t$definition\n";
 	
 	print "Phase I - Searching for tRNA annotations..\n";
 	##tRNA count
 	while ($accession_data =~ m!\s{5,}(tRNA\s{5,}.+(?:\s{10,}.+){1,})!g){
-		++$tRNA_total;
 		my $tRNA_annotation = $1;
+		++$tRNA_total;
+		
+		my $location = $1 if ($tRNA_annotation=~ m|tRNA\s+((?:complement\()?(?:join\()?([\.,\d]+)\)?\)?)|); 
+		
 		if ($tRNA_annotation =~ m!(pseudo|pseudogene)!i){ #Skips if it is annotated as a pseudogene
-			$warnings{'*Pseudo tRNA Annotation [#position]'} .= "#$tRNA_total ";
+			$warnings{'*Pseudo tRNA Annotation [#position]'} .= "#$tRNA_total - $location ";
 			next;
 		}
 		if ($tRNA_annotation=~ m!\/gene=".+?(fM|fMet).*?"!i){
 			print "fM or fMet is being skipped.\n";
-			$warnings{'*fMet Annotation [#position]'} .= "#$tRNA_total ";
+			$warnings{'*fMet Annotation [#position]'} .= "#$tRNA_total - $location ";
 			next;
 		}; #skip trnfM, formyl-Methionine 
 		my $AA = '';
@@ -561,7 +573,7 @@ while (<DATA>) {
 			$AA = $one_letter2three_letter{$1}; 
 			unless (exists $AA2anticodons{$AA}) { #Skips if it is not a standard AA
 				print "$AA is being skipped.\n";
-				$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total ";
+				$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total - $location ";
 				next;
 			}	
 			my $index = first { (lc($tRNA[$_])) eq (lc($AA)) } 0..$#tRNA;
@@ -572,7 +584,7 @@ while (<DATA>) {
 				my $product = $1;
 				if (uc $product ne uc $AA){
 					print "Gene name and product do not match: Gene for $AA but the product shown is $product\n"; #e.g. NC_022431.1 in complement(36270..36343)
-					$warnings{'*MISSMATCH Gene and Product annotations do not agree [#position]'} .= "#$tRNA_total "; 
+					$warnings{'*MISSMATCH Gene and Product annotations do not agree [#position]'} .= "#$tRNA_total - $location "; 
 				}
 			}
 						
@@ -580,7 +592,7 @@ while (<DATA>) {
 			$AA = $1; 
 			unless (exists $AA2anticodons{$AA}) {
 				print "$AA is being skipped.\n";
-				$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total ";
+				$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total - $location ";
 				next;
 			}	#Skips if it is not a standard AA
 			my $index = first { (lc($tRNA[$_])) eq (lc($AA)) } 0..$#tRNA;
@@ -588,7 +600,7 @@ while (<DATA>) {
 				++$tRNA_count[$index];
 			}
 		} else {
-			$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total ";
+			$warnings{'*Non-standard tRNA Annotation [#position]'} .= "#$tRNA_total - $location ";
 			next;	#Not a standard tRNA annotation
 		}
 		
@@ -634,14 +646,14 @@ while (<DATA>) {
 			++$anticodon_count{$rev_anticodon};
 			++$anticodon_total;
 			
-			$warnings{'*MISSMATCH Codon and anticodon annotations do not agree [#position]'} .= "$AA($anticodon)->$anticodon2AA{$rev_anticodon}($rev_anticodon), #$tRNA_total";
+			$warnings{'*MISSMATCH Codon and anticodon annotations do not agree [#position]'} .= "#$tRNA_total - $location ($AA($anticodon)->$anticodon2AA{$rev_anticodon}($rev_anticodon))";
 			
 			print "$AA($anticodon) Codon/Anticodon Typo mistake? ->$anticodon2AA{$rev_anticodon}($rev_anticodon)\n";
 		}elsif (defined $anticodon2AA{$anticodon} and (uc $anticodon2AA{$anticodon} eq 'MET' and uc $AA eq 'ILE')){		
 			$anticodon = 'TAT';	#assigns tRNA-CAU to Ile when specified in the annotation
 			++$anticodon_count{$anticodon};
 			++$anticodon_total;	
-			$warnings{'*tRNA-CAU annotated as tRNA-Ile (not Met) [#position]'} .= "#$tRNA_total ";	
+			$warnings{'*tRNA-CAU annotated as tRNA-Ile (not Met) [#position]'} .= "#$tRNA_total - $location ";	
 		}else {
 		#	print "$tRNA_annotation\n\nUnknown anticodon..searching..\n";
 			++$unknown_anticodons;
@@ -711,19 +723,41 @@ while (<DATA>) {
 		open (TRNASCAN_LOG, ">", "tRNASEQ LOG.txt") or die "Cannot write tRNAscan LOG file";
 
 		my $tRNAscan;
+		
+		# tRNAscan-SE 2.0
+	
+		# -E                          : search for eukaryotic tRNAs (default)
+		# -B                          : search for bacterial tRNAs
+		# -A                          : search for archaeal tRNAs
+		# -M <model>                  : search for mitochondrial tRNAs, options: mammal, vert
+		# -O                          : search for other organellar tRNAs
+		# -G                          : use general tRNA model (cytoslic tRNAs from all 3 domains included)
+		# --mt <model>                : use mito tRNA models for cytosolic/mito detemination (if not specified, only cytosolic isotype-specific model scan will be performed)
+
+		# --brief					: brief output format (no column headers)
+		# -Q  						: do not prompt user before overwriting pre-existing result files(for batch processing)
+		# -q  --quiet               : quiet mode (credits & run option selections suppressed)
+
 		if ($organism =~ m|bacteria|i) {
 			print "Phase II - ** Bacterial Genome ** tRNAscan-SE is searching for bacterial tRNAs..\n";
-			$tRNAscan = `tRNAscan-SE -B -Q -b -q /home/tRNASEQ.txt`; #Uses the covariance model specific for bacteria genomes
-		} elsif ($definition =~ m!(plastid|chloroplast|apicoplast|chromatophore|cyanelle|mithocondrion)!i){
+			$tRNAscan = `tRNAscan-SE -B -Q -q --brief /home/tRNASEQ.txt 2>&1`; #Uses the covariance model specific for bacteria genomes
+		} elsif (($definition =~ m!(plastid|chloroplast|apicoplast|chromatophore|cyanelle|mithocondrion)!i) or ($source =~ m!(plastid|chloroplast|apicoplast|chromatophore|cyanelle|mithocondrion)!i)){
 			print "Phase II - ** Organellar Genome ** tRNAscan-SE is searching for organellar tRNAs..\n";	
-			$tRNAscan = `tRNAscan-SE -O -Q -b -q /home/tRNASEQ.txt`; #Uses the covariance model specific for plastids/mitochondria genomes, disabling the PSEUDOGENES check
+			$tRNAscan = `tRNAscan-SE -O -Q -q --brief /home/tRNASEQ.txt 2>&1`; #Uses the covariance model specific for plastids/mitochondria genomes, disabling the PSEUDOGENES check
+		} elsif ($definition =~ m!(chromosome)!i){
+			print "Phase II - ** Eukariotic Genome ** tRNAscan-SE is searching for eukariotic tRNAs..\n";	
+			$tRNAscan = `tRNAscan-SE -E -Q -q --brief /home/tRNASEQ.txt 2>&1`; #Uses the covariance model specific for : search for eukaryotic tRNAs
 		}else {
 			print "Phase II - ** Nuclear or Unspecified Genome ** tRNAscan-SE is searching for generic tRNAs..\n";
-			$tRNAscan = `tRNAscan-SE -Q -b -q /home/tRNASEQ.txt`; #Uses the generic covariance model
+			$tRNAscan = `tRNAscan-SE -G -Q -q --brief /home/tRNASEQ.txt 2>&1`; #Uses the generic covariance model
 		}
-		
+
 		print TRNASCAN_LOG ">$name\n";
 		print TRNASCAN_LOG "$tRNAscan\n\n";
+		
+		if ($tRNAscan =~ m/\.fpass for writing.\s+Aborting program./g){
+			die "\n\n ****** STOPPED - Infernal hasn't been installed properly. ****** \n\n";
+		}
 
 		while ($tRNAscan =~ m%(.+?)(?:\s+\d+?){3}\s+(\w{3}|Pseudo)\s+(\w{3})\s%g){   #Read also PSEUDOGENES from tRNAscan
 			my $seq = $1;
@@ -966,9 +1000,6 @@ sub reverse_complement {
         $revcomp =~ tr/ACGTUacgtu/TGCAAtgcaa/;
         return $revcomp;
 }
-<>
 
-
-
-
+exit;
 
