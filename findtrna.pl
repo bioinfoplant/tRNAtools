@@ -739,20 +739,24 @@ while (<DATA>) {
 
 		if ($organism =~ m|bacteria|i) {
 			print "Phase II - ** Bacterial Genome ** tRNAscan-SE is searching for bacterial tRNAs..\n";
-			$tRNAscan = `tRNAscan-SE -B -Q -q --brief /home/tRNASEQ.txt`; #Uses the covariance model specific for bacteria genomes
+			$tRNAscan = `tRNAscan-SE -B -Q -q --brief /home/tRNASEQ.txt 2>&1`; #Uses the covariance model specific for bacteria genomes
 		} elsif (($definition =~ m!(plastid|chloroplast|apicoplast|chromatophore|cyanelle|mithocondrion)!i) or ($source =~ m!(plastid|chloroplast|apicoplast|chromatophore|cyanelle|mithocondrion)!i)){
 			print "Phase II - ** Organellar Genome ** tRNAscan-SE is searching for organellar tRNAs..\n";	
-			$tRNAscan = `tRNAscan-SE -O -Q -q --brief /home/tRNASEQ.txt`; #Uses the covariance model specific for plastids/mitochondria genomes, disabling the PSEUDOGENES check
+			$tRNAscan = `tRNAscan-SE -O -Q -q --brief /home/tRNASEQ.txt 2>&1`; #Uses the covariance model specific for plastids/mitochondria genomes, disabling the PSEUDOGENES check
 		} elsif ($definition =~ m!(chromosome)!i){
 			print "Phase II - ** Eukariotic Genome ** tRNAscan-SE is searching for eukariotic tRNAs..\n";	
-			$tRNAscan = `tRNAscan-SE -E -Q -q --brief /home/tRNASEQ.txt`; #Uses the covariance model specific for : search for eukaryotic tRNAs
+			$tRNAscan = `tRNAscan-SE -E -Q -q --brief /home/tRNASEQ.txt 2>&1`; #Uses the covariance model specific for : search for eukaryotic tRNAs
 		}else {
 			print "Phase II - ** Nuclear or Unspecified Genome ** tRNAscan-SE is searching for generic tRNAs..\n";
-			$tRNAscan = `tRNAscan-SE -G -Q -q --brief /home/tRNASEQ.txt`; #Uses the generic covariance model
+			$tRNAscan = `tRNAscan-SE -G -Q -q --brief /home/tRNASEQ.txt 2>&1`; #Uses the generic covariance model
 		}
 
 		print TRNASCAN_LOG ">$name\n";
 		print TRNASCAN_LOG "$tRNAscan\n\n";
+		
+		if ($tRNAscan =~ m/\.fpass for writing.\s+Aborting program./g){
+			die "\n\n ****** STOPPED - Infernal hasn't been installed properly. ****** \n\n";
+		}
 
 		while ($tRNAscan =~ m%(.+?)(?:\s+\d+?){3}\s+(\w{3}|Pseudo)\s+(\w{3})\s%g){   #Read also PSEUDOGENES from tRNAscan
 			my $seq = $1;
