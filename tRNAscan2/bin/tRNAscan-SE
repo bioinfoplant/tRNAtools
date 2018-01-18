@@ -126,7 +126,7 @@ if (($stats->numscanned() == 0) && ($opts->eufind_mode() || $opts->tscan_mode() 
     }
     else
     {
-        die "\nFATAL: No sequences in FASTA format found in file ".$opts->fasta_file()."\n\n";
+        die "\nFATAL: No sequences in FASTA format found in file ".$opts->fastafile()."\n\n";
     }
 }
 
