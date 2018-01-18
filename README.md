@@ -1,4 +1,4 @@
-tRNA tools - by Mattia Belli
+tRNA tools - by Mattia Belli 2013-2018
 ====
 
 Perl scripts to analyze tRNA gene content, codon frequency and their correlation in genomes.
@@ -7,6 +7,7 @@ BASED on:
 
 * tRNAscan-SE
 Lowe, T.M. & Chan, P.P. (2016) Nucl. Acids Res. 44: W54-57.
+
 Lowe, T.M. & Eddy, S.R. (1997) Nucl. Acids Res. 25: 955-964.
 
 * CodonW 1.4.4 http://codonw.sourceforge.net/
