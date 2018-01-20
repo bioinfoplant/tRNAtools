@@ -38,6 +38,7 @@ Add Bribes and Trouchelle repositories:
 
 OPTIONAL 
 To use all the features of CORR checker
+
 3) Install R:
 - http://www.r-project.org/
 
