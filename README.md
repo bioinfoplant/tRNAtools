@@ -30,7 +30,6 @@ Add Bribes and Trouchelle repositories:
 - ppm rep add Trouchelle http://trouchelle.com/ppm
 
 2) Install the following Perl modules:
-
 - List::Util
 - LWP
 - Statistics::RankCorrelation
@@ -39,7 +38,7 @@ Add Bribes and Trouchelle repositories:
 
 OPTIONAL 
 To use all the features of CORR checker
-4) Install R:
+3) Install R:
 - http://www.r-project.org/
 
-5) Install the package "coin".
+4) Install the package "coin".
