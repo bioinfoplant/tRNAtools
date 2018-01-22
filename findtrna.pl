@@ -18,7 +18,7 @@ use Benchmark;
 use IO::Tee;
 
 my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-my $prog_name = ($year + 1900).'-'.($mon+1).'-'.$mday;
+my $date = ($year + 1900).'-'.($mon+1).'-'.$mday;
 
 my $os = $^O;
 print "Running in: $os\n";
@@ -54,15 +54,16 @@ my $out5 = 0;
 my $out6 = 0;
 
 open (DATA, "<", $input_file) or die "Cannot read the data file";
-open (OUT, ">", "$input_file - [$prog_name] tRNA FULL Data.txt") or die "Cannot write the output files";
-open (OUT2, ">", "$input_file - [$prog_name] tRNA ANTICODONS Data.txt") or die "Cannot write the output files" if $out2;
-open (OUT3, ">", "$input_file - [$prog_name] tRNA Data.txt") or die "Cannot write the output files";
-open (OUT4, ">", "$input_file - [$prog_name] tRNA R READY.txt") or die "Cannot write the output files";
-open (OUT5, ">", "$input_file - [$prog_name] tRNA R READY RGF.txt") or die "Cannot write the output files" if $out5;
-open (OUT6, ">", "$input_file - [$prog_name] tRNA R READY RGF x size correction.txt") or die "Cannot write the output files" if $out6;
-open (OUT7, ">", "$input_file - [$prog_name] tRNA Discarded species.txt") or die "Cannot write the output files";
-open (OUT8, ">", "$input_file - [$prog_name] tRNA Warnings.txt") or die "Cannot write the output files";
-open (LOG, ">", "$input_file - [$prog_name] LOG.txt") or die "Cannot write the log file";
+open (OUT, ">", "$input_file - [$date] tRNA FULL Data.txt") or die "Cannot write the output files";
+open (OUT2, ">", "$input_file - [$date] tRNA ANTICODONS Data.txt") or die "Cannot write the output files" if $out2;
+open (OUT3, ">", "$input_file - [$date] tRNA Data.txt") or die "Cannot write the output files";
+open (OUT4, ">", "$input_file - [$date] tRNA R READY.txt") or die "Cannot write the output files";
+open (OUT5, ">", "$input_file - [$date] tRNA R READY RGF.txt") or die "Cannot write the output files" if $out5;
+open (OUT6, ">", "$input_file - [$date] tRNA R READY RGF x size correction.txt") or die "Cannot write the output files" if $out6;
+open (OUT7, ">", "$input_file - [$date] tRNA Discarded species.txt") or die "Cannot write the output files";
+open (OUT8, ">", "$input_file - [$date] tRNA Warnings.txt") or die "Cannot write the output files";
+open (LOG, ">", "$input_file - [$date] LOG.txt") or die "Cannot write the log file";
+open (SUMMARY, ">", "$input_file - [$date] SUMMARY.txt") or die "Cannot write the Summary file";
 
 my $tee = IO::Tee->new(\*STDOUT, \*LOG);
 select $tee;
@@ -331,7 +332,7 @@ print OUT4  "NAME	DIVISION	";
 print OUT5  "NAME	DIVISION	" if $out5;
 print OUT6  "NAME	DIVISION	" if $out6;
 print OUT8  "NAME	STATS	Pseudo tRNA	fMet	Non-standard tRNA	MISSMATCH Gene and Product	MISSMATCH Codon and anticodon	tRNA-CAU annotated as tRNA-Ile	tRNAscan-SE Pseudogene	MISSMATCH Ile/Met from tRNAscan-SE	MISMATCH tRNAscan Amino Acid vs Annotated AA";
-
+print SUMMARY "$input_file - [$date]\n";
 
 foreach (0..$#tRNA) {
 	print OUT "$tRNA[$_]	";
@@ -367,7 +368,11 @@ print OUT5 "\n" if $out5;
 print OUT6 "\n" if $out6;
 
 
-my $n;
+my $n = 0;
+my $without_tRNA_annotations = 0;
+my $with_tRNA_annotations = 0;
+my $with_standard_tRNA_annotations = 0;
+my $recovered_by_tRNAscan = 0;
 my $accession_data;
 my %results;
 my %results2;
@@ -379,6 +384,8 @@ my %ids;
 my %names;
 my %chromosomes;
 my %results_warning;
+my %group_total_summary;
+my %group_final_summary;
 
 my $start_time = new Benchmark;
 
@@ -440,8 +447,11 @@ while (<DATA>) {
 	    print OUT7 ">$name	[No tRNAs found]\n";
 		$warnings{'*No tRNAs found'} = "SKIPPED no tRNAs found!";
 		undef $accession_data;
+		++$without_tRNA_annotations;
 		next;
 	}
+	
+	++$with_tRNA_annotations;
 	
 	$organism =~ s/^[\s]+//g;
 	$organism =~ s/\s{2,}/ /g;
@@ -454,6 +464,8 @@ while (<DATA>) {
 	} elsif ($organism =~ m|(.+?);|i) {
 		$group =  $1;
 	}
+	
+	++$group_total_summary{$group};
 
 	# $group = 'Rhodophytes' if ($organism =~ m|Rhodophyta|i);
 	# $group = 'Glaucophytes' if ($organism =~ m|Glaucocystophyceae|i);
@@ -714,6 +726,8 @@ while (<DATA>) {
 		next;
 	}
 	
+	++$with_standard_tRNA_annotations if ($unknown_anticodons == 0);
+	
 	#Scanning with tRNAscan
 	my $tRNAscan_success=0;
 	if ($unknown_anticodons>0) {
@@ -851,6 +865,8 @@ while (<DATA>) {
 	
 		undef %warnings;
 		
+		++$group_final_summary{$group};
+		++$recovered_by_tRNAscan;
 		print "FINISHED - Anticodons FOUND\n\n";
 
 	}
@@ -953,7 +969,20 @@ while (<DATA>) {
 
 }
 
-
+print SUMMARY "---------------------------------------\n";
+print SUMMARY "$n	record(s) processed.\n"; #Total number of genomes processed
+print SUMMARY "$without_tRNA_annotations	record(s) with no tRNA annotations.\n"; #Number of genomes without any tRNA annotation
+print SUMMARY "$with_tRNA_annotations	record(s) with tRNA annotations.\n"; #Number of genomes with tRNA annotations
+print SUMMARY "$with_standard_tRNA_annotations	record(s) with standard and complete tRNA annotations.\n"; #Number of genomes with complete annotations for standard tRNAs
+print SUMMARY "$recovered_by_tRNAscan	record(s) recovered by using tRNAscan-SE.\n"; #Number of genomes with tRNA annotations (anticodon) recovered by tRNAscan-SE
+my $lost_records = $n - ($with_standard_tRNA_annotations + $recovered_by_tRNAscan);
+print SUMMARY "$lost_records	record(s) discarded during the processing.\n";
+print SUMMARY "---------------------------------------\n";
+print SUMMARY "Before	After	GroupName\n";
+foreach (sort keys %group_total_summary){
+	print SUMMARY "$group_total_summary{$_}	$group_final_summary{$_}	$_\n";
+}
+print SUMMARY "---------------------------------------\n";
 	
 foreach (sort keys %results){
 	if (ref $results{$_}) {
@@ -977,6 +1006,7 @@ foreach (sort keys %results){
 my $end_time   = new Benchmark;
 my $difference = timediff($end_time, $start_time);
 print "##### Benchmark #####\n: It took ", timestr($difference), "!\n";
+print SUMMARY "##### Benchmark #####\n: It took ", timestr($difference), "!\n";
 
 close DATA;
 close OUT;
@@ -987,6 +1017,8 @@ close OUT5 if $out5;
 close OUT6 if $out6;
 close OUT7;
 close OUT8;
+# close LOG;
+close SUMMARY;
 
 print "\nDONE";
 
