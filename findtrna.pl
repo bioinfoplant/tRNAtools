@@ -54,6 +54,7 @@ my $out5 = 0;
 my $out6 = 0;
 
 open (DATA, "<", $input_file) or die "Cannot read the data file";
+
 open (OUT, ">", "$input_file - [$date] tRNA FULL Data.txt") or die "Cannot write the output files";
 open (OUT2, ">", "$input_file - [$date] tRNA ANTICODONS Data.txt") or die "Cannot write the output files" if $out2;
 open (OUT3, ">", "$input_file - [$date] tRNA Data.txt") or die "Cannot write the output files";
