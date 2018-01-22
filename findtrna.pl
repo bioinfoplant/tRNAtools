@@ -386,6 +386,8 @@ my %names;
 my %chromosomes;
 my %results_warning;
 my %group_total_summary;
+my %group_with_annotations_summary;
+my %group_before_summary;
 my %group_final_summary;
 
 my $start_time = new Benchmark;
@@ -442,18 +444,6 @@ while (<DATA>) {
 	
 	my %warnings;
 	
-	#Skips if there are no tRNA annotations
-	unless ($accession_data =~ m!\s{5,}(tRNA\s{5,}.+(?:\s{10,}.+){1,})!) {
-		print "$name -> no tRNAs found!\n";
-	    print OUT7 ">$name	[No tRNAs found]\n";
-		$warnings{'*No tRNAs found'} = "SKIPPED no tRNAs found!";
-		undef $accession_data;
-		++$without_tRNA_annotations;
-		next;
-	}
-	
-	++$with_tRNA_annotations;
-	
 	$organism =~ s/^[\s]+//g;
 	$organism =~ s/\s{2,}/ /g;
 
@@ -467,6 +457,19 @@ while (<DATA>) {
 	}
 	
 	++$group_total_summary{$group};
+	
+	#Skips if there are no tRNA annotations
+	unless ($accession_data =~ m!\s{5,}(tRNA\s{5,}.+(?:\s{10,}.+){1,})!) {
+		print "$name -> no tRNAs found!\n";
+	    print OUT7 ">$name	[No tRNAs found]\n";
+		$warnings{'*No tRNAs found'} = "SKIPPED no tRNAs found!";
+		undef $accession_data;
+		++$without_tRNA_annotations;
+		next;
+	}
+	
+	++$with_tRNA_annotations;
+	++$group_with_annotations_summary{$group};
 
 	# $group = 'Rhodophytes' if ($organism =~ m|Rhodophyta|i);
 	# $group = 'Glaucophytes' if ($organism =~ m|Glaucocystophyceae|i);
@@ -728,6 +731,7 @@ while (<DATA>) {
 	}
 	
 	++$with_standard_tRNA_annotations if ($unknown_anticodons == 0);
+	++$group_before_summary{$group} if ($unknown_anticodons == 0);
 	
 	#Scanning with tRNAscan
 	my $tRNAscan_success=0;
@@ -979,9 +983,13 @@ print SUMMARY "$recovered_by_tRNAscan	record(s) recovered by using tRNAscan-SE.\
 my $lost_records = $n - ($with_standard_tRNA_annotations + $recovered_by_tRNAscan);
 print SUMMARY "$lost_records	record(s) discarded during the processing.\n";
 print SUMMARY "---------------------------------------\n";
-print SUMMARY "Before	After	GroupName\n";
+print SUMMARY "Total	Total With Annotations	Without tRNAscan	Using tRNAscan	GroupName\n";
 foreach (sort keys %group_total_summary){
-	print SUMMARY "$group_total_summary{$_}	$group_final_summary{$_}	$_\n";
+	$group_total_summary{$_} = 0 unless $group_total_summary{$_};
+	$group_with_annotations_summary{$_} = 0 unless $group_with_annotations_summary{$_};
+	$group_before_summary{$_} = 0 unless $group_before_summary{$_};
+	$group_final_summary{$_} = 0 unless $group_final_summary{$_};
+	print SUMMARY "$group_total_summary{$_}	$group_with_annotations_summary{$_}	$group_before_summary{$_}	$group_final_summary{$_}	$_\n";
 }
 print SUMMARY "---------------------------------------\n";
 	
