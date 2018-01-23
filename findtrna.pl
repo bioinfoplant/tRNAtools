@@ -388,7 +388,7 @@ my %results_warning;
 my %group_total_summary;
 my %group_with_annotations_summary;
 my %group_before_summary;
-my %group_final_summary;
+my %group_after_summary;
 
 my $start_time = new Benchmark;
 
@@ -870,7 +870,7 @@ while (<DATA>) {
 	
 		undef %warnings;
 		
-		++$group_final_summary{$group};
+		++$group_after_summary{$group};
 		++$recovered_by_tRNAscan;
 		print "FINISHED - Anticodons FOUND\n\n";
 
@@ -983,13 +983,15 @@ print SUMMARY "$recovered_by_tRNAscan	record(s) recovered by using tRNAscan-SE.\
 my $lost_records = $n - ($with_standard_tRNA_annotations + $recovered_by_tRNAscan);
 print SUMMARY "$lost_records	record(s) discarded during the processing.\n";
 print SUMMARY "---------------------------------------\n";
-print SUMMARY "Total	Total With Annotations	Without tRNAscan	Using tRNAscan	GroupName\n";
+print SUMMARY "Total	Total With Annotations	Without tRNAscan	Recovered by tRNAscan	Total using tRNAscan	GroupName\n";
+
 foreach (sort keys %group_total_summary){
 	$group_total_summary{$_} = 0 unless $group_total_summary{$_};
 	$group_with_annotations_summary{$_} = 0 unless $group_with_annotations_summary{$_};
 	$group_before_summary{$_} = 0 unless $group_before_summary{$_};
-	$group_final_summary{$_} = 0 unless $group_final_summary{$_};
-	print SUMMARY "$group_total_summary{$_}	$group_with_annotations_summary{$_}	$group_before_summary{$_}	$group_final_summary{$_}	$_\n";
+	$group_after_summary{$_} = 0 unless $group_after_summary{$_};
+	my $group_final_summary = $group_before_summary{$_} + $group_after_summary{$_};
+	print SUMMARY "$group_total_summary{$_}	$group_with_annotations_summary{$_}	$group_before_summary{$_}	$group_after_summary{$_}	$group_final_summary	$_\n";
 }
 print SUMMARY "---------------------------------------\n";
 	
