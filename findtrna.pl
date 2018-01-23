@@ -326,7 +326,7 @@ my %one_letter2three_letter = (
 	'W' => 'Trp'
 );
 
-print OUT  "NAME	DEFINITION	DIVISION	SIZE	NCBI ID	CLASSIFICATION	DATE	TOTAL tRNAs	tRNA species	tRNAs standard	Unknown Anticodons	";
+print OUT  "NAME	DEFINITION	DIVISION	SIZE	NCBI ID	CLASSIFICATION	DATE	TOTAL tRNAs	tRNA species	tRNAs standard	Unknown Anticodons	Missing tRNAs	";
 print OUT2  "NAME	DIVISION	SIZE	NCBI ID	CLASSIFICATION	DATE	TOTAL STANDARD ANTICODONS	" if $out2;
 print OUT3  "NAME	DIVISION	SIZE	CLASSIFICATION	TOTAL STANDARD CODONS	tRNA species	";
 print OUT4  "NAME	DIVISION	";
@@ -845,7 +845,7 @@ while (<DATA>) {
 		}
 		
 		
-#######Skips the whole genome record if tRNAscan fail to identify all the missing codons
+		#######Skips the whole genome record if tRNAscan fail to identify all the missing codons
 		unless ($anticodon_total == $tRNA_standard) {
 			
 			print OUT7 ">$name	[tRNAscan-SE failed to find the missing anticodons]\n";
@@ -866,7 +866,7 @@ while (<DATA>) {
 			undef %warnings;
 			next;
 		}
-#######################
+		###############
 	
 		undef %warnings;
 		
@@ -877,11 +877,16 @@ while (<DATA>) {
 	}
 
 
-	my $tRNA_species;
+	my $tRNA_species = 0;
 	foreach (keys %anticodon_count){	
 		if ($anticodon_count{$_} > 0){
 			++$tRNA_species;
 		}
+	}
+	
+	my $missing_tRNAs = 0;
+	foreach (0..$#tRNA_count) {
+		++$missing_tRNAs if $tRNA_count[$_] == 0;
 	}
 	
 	#OUTPUT
@@ -899,7 +904,7 @@ while (<DATA>) {
 		$results3{$name_original}[4] += $anticodon_total;
 	}
 	
-	$results{$name} = "$name	$definition	$group	$size	$id	$organism	$date	$tRNA_total	$tRNA_species	$tRNA_standard	$unknown_anticodons	";
+	$results{$name} = "$name	$definition	$group	$size	$id	$organism	$date	$tRNA_total	$tRNA_species	$tRNA_standard	$unknown_anticodons	$missing_tRNAs	";
 	$results2{$name} = "$name	$group	$size	$id	$organism	$date	$anticodon_total	";
 	$results3{$name} = "$name	$group	$size	$organism	$anticodon_total	$tRNA_species	";
 	$results4{$name} = "$name	$group	";
@@ -919,6 +924,7 @@ while (<DATA>) {
 	foreach (0..$#tRNA_count) {
 		$results{$name} .= "$tRNA_count[$_]	";
 	}
+	
 	foreach (sort keys %AA2anticodons){
 		my $ref = $AA2anticodons{$_};
 		foreach (sort @$ref){		
@@ -969,6 +975,7 @@ while (<DATA>) {
 
 	undef $accession_data;
 	undef $unknown_anticodons;
+	undef $missing_tRNAs;
 	undef %AA_to_find;
 	undef %seq_to_find;
 
