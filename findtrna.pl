@@ -55,16 +55,16 @@ my $out6 = 0;
 
 open (DATA, "<", $input_file) or die "Cannot read the data file";
 
-open (OUT, ">", "$input_file - [$date] tRNA FULL Data.txt") or die "Cannot write the output files";
-open (OUT2, ">", "$input_file - [$date] tRNA ANTICODONS Data.txt") or die "Cannot write the output files" if $out2;
-open (OUT3, ">", "$input_file - [$date] tRNA Data.txt") or die "Cannot write the output files";
-open (OUT4, ">", "$input_file - [$date] tRNA R READY.txt") or die "Cannot write the output files";
-open (OUT5, ">", "$input_file - [$date] tRNA R READY RGF.txt") or die "Cannot write the output files" if $out5;
-open (OUT6, ">", "$input_file - [$date] tRNA R READY RGF x size correction.txt") or die "Cannot write the output files" if $out6;
-open (OUT7, ">", "$input_file - [$date] tRNA Discarded species.txt") or die "Cannot write the output files";
+open (OUT, ">", "$input_file - [$date] tRNA Species.txt") or die "Cannot write the output files";
+open (OUT2, ">", "$input_file - [$date] tRNA Anticodons.txt") or die "Cannot write the output files" if $out2;
+open (OUT3, ">", "$input_file - [$date] tRNA Codons.txt") or die "Cannot write the output files";
+open (OUT4, ">", "$input_file - [$date] tRNA Codons R READY.txt") or die "Cannot write the output files";
+open (OUT5, ">", "$input_file - [$date] tRNA Codons R READY RGF.txt") or die "Cannot write the output files" if $out5;
+open (OUT6, ">", "$input_file - [$date] tRNA Codons R READY RGF x size correction.txt") or die "Cannot write the output files" if $out6;
+open (OUT7, ">", "$input_file - [$date] tRNA Discarded Species.txt") or die "Cannot write the output files";
 open (OUT8, ">", "$input_file - [$date] tRNA Warnings.txt") or die "Cannot write the output files";
-open (LOG, ">", "$input_file - [$date] LOG.txt") or die "Cannot write the log file";
-open (SUMMARY, ">", "$input_file - [$date] SUMMARY.txt") or die "Cannot write the Summary file";
+open (LOG, ">", "$input_file - [$date] tRNA LOG.txt") or die "Cannot write the log file";
+open (SUMMARY, ">", "$input_file - [$date] tRNA SUMMARY.txt") or die "Cannot write the Summary file";
 
 my $tee = IO::Tee->new(\*STDOUT, \*LOG);
 select $tee;
