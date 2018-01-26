@@ -985,10 +985,12 @@ print SUMMARY "---------------------------------------\n";
 print SUMMARY "$n	record(s) processed.\n"; #Total number of genomes processed
 print SUMMARY "$without_tRNA_annotations	record(s) with no tRNA annotations.\n"; #Number of genomes without any tRNA annotation
 print SUMMARY "$with_tRNA_annotations	record(s) with tRNA annotations.\n"; #Number of genomes with tRNA annotations
-print SUMMARY "$with_standard_tRNA_annotations	record(s) with standard and complete tRNA annotations.\n"; #Number of genomes with complete annotations for standard tRNAs
-print SUMMARY "$recovered_by_tRNAscan	record(s) recovered by using tRNAscan-SE.\n"; #Number of genomes with tRNA annotations (anticodon) recovered by tRNAscan-SE
+print SUMMARY "$with_standard_tRNA_annotations	(+) record(s) with standard and complete tRNA annotations.\n"; #Number of genomes with complete annotations for standard tRNAs
+print SUMMARY "$recovered_by_tRNAscan	(+) record(s) recovered by using tRNAscan-SE.\n"; #Number of genomes with tRNA annotations (anticodon) recovered by tRNAscan-SE
 my $lost_records = $n - ($with_standard_tRNA_annotations + $recovered_by_tRNAscan);
-print SUMMARY "$lost_records	record(s) discarded during the processing.\n";
+print SUMMARY "$lost_records	(-) record(s) discarded during the processing.\n";
+my $total_records = $with_standard_tRNA_annotations + $recovered_by_tRNAscan;
+print SUMMARY "$total_records	(=) record(s) successfully processed.\n";
 print SUMMARY "---------------------------------------\n";
 print SUMMARY "Total	Total With Annotations	Without tRNAscan	Recovered by tRNAscan	Total using tRNAscan	GroupName\n";
 
