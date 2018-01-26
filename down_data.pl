@@ -69,6 +69,8 @@ sub download {
 	
 	print "	Saving..\n";
 	$data .= $efetch->decoded_content;
+	$data =~ s/\r//g; #Removes carriage returns changing the EOF from CRLR to LR only,
+					  #otherwise findtrna.pl could give errors during pattern matching
 	
 	print "Done.\n\n";		
 }
