@@ -19,7 +19,7 @@ my $base = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/';
 my $query;
 my @acc;
 my $data;
-my $api_option = '&api_key=ebe53cc33800b2a9c2f69fc5bc0047b58e08'; #Registered through NCBI account
+my $api_option = ''; # Insert here the API key Registered through NCBI account
 
 open (INPUT_FILE, "<", 'accnumber.txt') || die "Can't open file!\n";
 open (OUTPUT_FILE, ">", 'data.txt') || die "Can't write file!\n";;
