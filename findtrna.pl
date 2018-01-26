@@ -375,6 +375,7 @@ my $with_tRNA_annotations = 0;
 my $with_standard_tRNA_annotations = 0;
 my $recovered_by_tRNAscan = 0;
 my $accession_data;
+my $processed_records;
 my %results;
 my %results2;
 my %results3;
@@ -403,8 +404,7 @@ while (<DATA>) {
 	
 	print "\n*Processing.. $n \n";
 	
-	
-	my ($name, $source, $definition, $organism, $date, $size, $id, $sequence, $id_gi) = '' x 9;
+		my ($name, $source, $definition, $organism, $date, $size, $id, $sequence, $id_gi) = '' x 9;
 	if ($accession_data =~ m|LOCUS.+\s+?(\d+)\s?bp.+?(\S+)\n|){
 		$date = lc ($2);
 		$size = $1;
@@ -457,6 +457,9 @@ while (<DATA>) {
 	}
 	
 	++$group_total_summary{$group};
+	
+	print "$name\n\t$definition\n";
+	$processed_records .= "$n	$name\n";
 	
 	#Skips if there are no tRNA annotations
 	unless ($accession_data =~ m!\s{5,}(tRNA\s{5,}.+(?:\s{10,}.+){1,})!) {
@@ -561,8 +564,6 @@ while (<DATA>) {
 ############################
 	
 	open (TRNASEQ, ">", "tRNASEQ.txt") or die "Cannot write the tRNA sequence file";
-	
-	print "$name\n\t$definition\n";
 	
 	print "Phase I - Searching for tRNA annotations..\n";
 	##tRNA count
@@ -1003,6 +1004,8 @@ foreach (sort keys %group_total_summary){
 	print SUMMARY "$group_total_summary{$_}	$group_with_annotations_summary{$_}	$group_before_summary{$_}	$group_after_summary{$_}	$group_final_summary	$_\n";
 }
 print SUMMARY "---------------------------------------\n";
+print SUMMARY "List of processed records:\n\n";
+print SUMMARY $processed_records;
 	
 foreach (sort keys %results){
 	if (ref $results{$_}) {
