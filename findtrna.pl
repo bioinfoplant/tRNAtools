@@ -332,7 +332,7 @@ print OUT3  "NAME	DIVISION	SIZE	CLASSIFICATION	TOTAL STANDARD CODONS	tRNA specie
 print OUT4  "NAME	DIVISION	";
 print OUT5  "NAME	DIVISION	" if $out5;
 print OUT6  "NAME	DIVISION	" if $out6;
-print OUT8  "NAME	STATS	Pseudo tRNA	fMet	Non-standard tRNA	MISSMATCH Gene and Product	MISSMATCH Codon and anticodon	tRNA-CAU annotated as tRNA-Ile	tRNAscan-SE Pseudogene	MISSMATCH Ile/Met from tRNAscan-SE	MISMATCH tRNAscan Amino Acid vs Annotated AA";
+print OUT8  "NAME	STATS	Pseudo tRNA	fMet	Non-standard tRNA	MISSMATCH Gene and Product	MISSMATCH Codon and anticodon	tRNA-CAU annotated as tRNA-Ile	tRNAscan-SE Pseudogene	MISSMATCH Ile/Met from tRNAscan-SE	MISMATCH tRNAscan Amino Acid vs Annotated AA\n";
 print SUMMARY "$input_file - [$date]\n";
 
 foreach (0..$#tRNA) {
@@ -787,7 +787,7 @@ while (<DATA>) {
 			
 			if ($AA eq 'Pseudo') {
 				print "$AA gene\n";
-				$warnings{'*tRNAscan-SE Pseudogene found'} .= "\n		$seq";
+				$warnings{'*tRNAscan-SE Pseudogene found'} .= "$AA $seq | ";
 			}
 			
 			if ((uc $AA eq 'MET') and (uc $AA_to_find{$seq} eq 'ILE')){	
@@ -799,11 +799,11 @@ while (<DATA>) {
 					#E.g Arabidopsis thaliana, NC_000932.1.
 				$AA = 'ILE';
 				$anticodon = 'TAT';
-				$warnings{'*MISSMATCH Ile/Met from tRNAscan-SE (assuming Cytosine to Lysidine Mod)'} .= "$seq";
+				$warnings{'*MISSMATCH Ile/Met from tRNAscan-SE (assuming Cytosine to Lysidine Mod)'} .= "$AA $seq | ";
 			}
 			if (uc $AA ne uc $AA_to_find{$seq}){		#Skips if the tRNA anticodon predicted by tRNAscanSE is different from the annotated one.
 				$AA_to_find{$seq} = "MISMATCH: tRNAscan found $anticodon->$AA instead of the annotated $AA_to_find{$seq}";
-				$warnings{'*MISMATCH tRNAscan Amino Acid vs Annotated AA'} = "$anticodon->$AA instead of $AA_to_find{$seq}	$seq";
+				$warnings{'*MISMATCH tRNAscan Amino Acid vs Annotated AA'} = "$anticodon->$AA instead of $AA_to_find{$seq} >$seq< | ";
 				next;
 			} 
 
@@ -853,11 +853,11 @@ while (<DATA>) {
 
 			print "tRNAscan-SE failed to find the missing anticodons ($tRNAscan_success\/$unknown_anticodons).. discarding data.\n";
 			
-			print OUT8 ">$name\n" unless %warnings;
-			print OUT8 "	*SKIPPED - tRNAscan-SE failed to find missing anticodons ($tRNAscan_success\/$unknown_anticodons)\n";
+			print OUT8 ">$name	tRNA annotations $tRNA_total tRNA standard $tRNA_standard ANTICODONS $anticodon_total ND $unknown_anticodons\t" unless %warnings;
+			print OUT8 "	SKIPPED - tRNAscan-SE failed to find the missing anticodons ($tRNAscan_success\/$unknown_anticodons)\n";
 			foreach (keys %AA_to_find) {
-				print OUT8 "		$_	$AA_to_find{$_}\n";
-				print OUT8 "		> $seq_to_find{$_} < \n";
+				print OUT8 "	$_	$AA_to_find{$_}\n";
+				print OUT8 "	> $seq_to_find{$_} < \n";
 			}
 
 			
