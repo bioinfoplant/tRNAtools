@@ -332,7 +332,7 @@ print OUT3  "NAME	DIVISION	SIZE	CLASSIFICATION	TOTAL STANDARD CODONS	tRNA specie
 print OUT4  "NAME	DIVISION	";
 print OUT5  "NAME	DIVISION	" if $out5;
 print OUT6  "NAME	DIVISION	" if $out6;
-print OUT8  "NAME	STATS	Pseudo tRNA	fMet	Non-standard tRNA	MISSMATCH Gene and Product	MISSMATCH Codon and anticodon	tRNA-CAU annotated as tRNA-Ile	tRNAscan-SE Pseudogene	MISSMATCH Ile/Met from tRNAscan-SE	MISMATCH tRNAscan Amino Acid vs Annotated AA\n";
+print OUT8  "1. NAME	2. STATS	3. Pseudo tRNA	4. fMet	5. Non-standard tRNA	6. MISSMATCH Gene and Product	7. MISSMATCH Codon and anticodon	8. tRNA-CAU annotated as tRNA-Ile	9. tRNAscan-SE Pseudogene	10. MISSMATCH Ile/Met from tRNAscan-SE	11. MISMATCH tRNAscan Amino Acid vs Annotated AA\n";
 print SUMMARY "$input_file - [$date]\n";
 
 foreach (0..$#tRNA) {
@@ -823,25 +823,27 @@ while (<DATA>) {
 		
 		if (%warnings){		#Dont change the order, or remember to change the file headers
 			print "*** SEE WARNINGS ***\n\n";
-			print OUT8 ">$name	tRNA annotations $tRNA_total tRNA standard $tRNA_standard ANTICODONS $anticodon_total ND $unknown_anticodons";
+			print OUT8 "1. >$name";
 			print OUT8 "\t";
-			print OUT8 "$warnings{'*Pseudo tRNA Annotation [#position]'}" if $warnings{'*Pseudo tRNA Annotation [#position]'};
+			print OUT8 "2. tRNA annotations $tRNA_total tRNA standard $tRNA_standard ANTICODONS $anticodon_total ND $unknown_anticodons";
 			print OUT8 "\t";
-			print OUT8 "$warnings{'*fMet Annotation [#position]'}" if $warnings{'*fMet Annotation [#position]'};
+			print OUT8 "3. $warnings{'*Pseudo tRNA Annotation [#position]'}" if $warnings{'*Pseudo tRNA Annotation [#position]'};
 			print OUT8 "\t";
-			print OUT8 "$warnings{'*Non-standard tRNA Annotation [#position]'}" if $warnings{'*Non-standard tRNA Annotation [#position]'};	
+			print OUT8 "4. $warnings{'*fMet Annotation [#position]'}" if $warnings{'*fMet Annotation [#position]'};
 			print OUT8 "\t";
-			print OUT8 "$warnings{'*MISSMATCH Gene and Product annotations do not agree [#position]'}" if $warnings{'*MISSMATCH Gene and Product annotations do not agree [#position]'};			
+			print OUT8 "5. $warnings{'*Non-standard tRNA Annotation [#position]'}" if $warnings{'*Non-standard tRNA Annotation [#position]'};	
 			print OUT8 "\t";
-			print OUT8 "$warnings{'*MISSMATCH Codon and anticodon annotations do not agree [#position]'}" if $warnings{'*MISSMATCH Codon and anticodon annotations do not agree [#position]'};		
+			print OUT8 "6. $warnings{'*MISSMATCH Gene and Product annotations do not agree [#position]'}" if $warnings{'*MISSMATCH Gene and Product annotations do not agree [#position]'};			
 			print OUT8 "\t";
-			print OUT8 "$warnings{'*tRNA-CAU annotated as tRNA-Ile (not Met) [#position]'}" if $warnings{'*tRNA-CAU annotated as tRNA-Ile (not Met) [#position]'};	
+			print OUT8 "7. $warnings{'*MISSMATCH Codon and anticodon annotations do not agree [#position]'}" if $warnings{'*MISSMATCH Codon and anticodon annotations do not agree [#position]'};		
 			print OUT8 "\t";
-			print OUT8 "$warnings{'*tRNAscan-SE Pseudogene found'}" if $warnings{'*tRNAscan-SE Pseudogene found'};		
+			print OUT8 "8. $warnings{'*tRNA-CAU annotated as tRNA-Ile (not Met) [#position]'}" if $warnings{'*tRNA-CAU annotated as tRNA-Ile (not Met) [#position]'};	
 			print OUT8 "\t";
-			print OUT8 "$warnings{'*MISSMATCH Ile/Met from tRNAscan-SE (assuming Cytosine to Lysidine Mod)'}" if $warnings{'*MISSMATCH Ile/Met from tRNAscan-SE (assuming Cytosine to Lysidine Mod)'};
+			print OUT8 "9. $warnings{'*tRNAscan-SE Pseudogene found'}" if $warnings{'*tRNAscan-SE Pseudogene found'};		
+			print OUT8 "\t";
+			print OUT8 "10. $warnings{'*MISSMATCH Ile/Met from tRNAscan-SE (assuming Cytosine to Lysidine Mod)'}" if $warnings{'*MISSMATCH Ile/Met from tRNAscan-SE (assuming Cytosine to Lysidine Mod)'};
 			print OUT8 "\t";			
-			print OUT8 "$warnings{'*MISMATCH tRNAscan Amino Acid vs Annotated AA'}" if $warnings{'*MISMATCH tRNAscan Amino Acid vs Annotated AA'};
+			print OUT8 "11. $warnings{'*MISMATCH tRNAscan Amino Acid vs Annotated AA'}" if $warnings{'*MISMATCH tRNAscan Amino Acid vs Annotated AA'};
 			print OUT8 "\n";
 		}
 		
@@ -853,10 +855,16 @@ while (<DATA>) {
 
 			print "tRNAscan-SE failed to find the missing anticodons ($tRNAscan_success\/$unknown_anticodons).. discarding data.\n";
 			
-			print OUT8 ">$name	tRNA annotations $tRNA_total tRNA standard $tRNA_standard ANTICODONS $anticodon_total ND $unknown_anticodons\t" unless %warnings;
-			print OUT8 "	SKIPPED - tRNAscan-SE failed to find the missing anticodons ($tRNAscan_success\/$unknown_anticodons)\n";
+			unless (%warnings) {
+				print OUT8 "1. >$name";
+				print OUT8 "\t";
+				print OUT8 "2. tRNA annotations $tRNA_total tRNA standard $tRNA_standard ANTICODONS $anticodon_total ND $unknown_anticodons";
+				print OUT8 "\t";
+			}
+
+			print OUT8 "	2b. SKIPPED - tRNAscan-SE failed to find the missing anticodons ($tRNAscan_success\/$unknown_anticodons)\n";
 			foreach (keys %AA_to_find) {
-				print OUT8 "	$_	$AA_to_find{$_}\n";
+				print OUT8 "	$_ | $AA_to_find{$_}\n";
 				print OUT8 "	> $seq_to_find{$_} < \n";
 			}
 
